@@ -9,7 +9,7 @@ const corsSetup = (app: Express) => {
       //   exposedHeaders: "",
       //   preflightContinue:true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      allowedHeaders: ["Content-Type", "Authorization", "x-designer-id"],
+      allowedHeaders: ["Content-Type", "Authorization", "x-company-shortName"],
       credentials: true,
     })
   );

@@ -26,18 +26,18 @@ const changePasswordSchema = Joi.object({
 
 const forgotPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
-  type: Joi.string().valid("user", "designer").required(),
+  type: Joi.string().valid("user", "company").required(),
 });
 
 const resetPasswordSchema = Joi.object({
   token: Joi.string().required(),
   newPassword: Joi.string().min(6).required(),
-  type: Joi.string().valid("user", "designer").required(),
+  type: Joi.string().valid("user", "company").required(),
 });
 
 const resendActivationEmailSchema = Joi.object({
   email: Joi.string().email().required(),
-  type: Joi.string().valid("user", "designer").required(),
+  type: Joi.string().valid("user", "company").required(),
 });
 
 const verifyAccountSchema = Joi.object({
@@ -259,12 +259,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email, type } = req.body;
     if (type === designerType) {
-      const designer = await prisma.designer.findUnique({ where: { email } });
+      const company = await prisma.company.findUnique({ where: { email } });
 
-      if (!designer)
+      if (!company)
         return res.status(404).json({ error: "Designer's account not found" });
 
-      const token = generateJwtToken(designer.id, { expiresIn: "1h" });
+      const token = generateJwtToken(company.id, { expiresIn: "1h" });
       await sendResetEmail(email, token);
     } else {
       const user = await prisma.user.findUnique({ where: { email } });
@@ -306,8 +306,8 @@ export const resendActivationEmail = async (req: Request, res: Response) => {
     const { email, type } = req.body;
 
     if (type === designerType) {
-      const designer = await prisma.designer.findUnique({ where: { email } });
-      if (!designer) {
+      const company = await prisma.company.findUnique({ where: { email } });
+      if (!company) {
         return res.status(404).json(
           customResponse({
             message: "Designer's account was not found",
@@ -316,7 +316,7 @@ export const resendActivationEmail = async (req: Request, res: Response) => {
         );
       }
 
-      if (designer.isActive) {
+      if (company.isActive) {
         return res.status(400).json(
           customResponse({
             message: "Account is already activated",
@@ -327,8 +327,8 @@ export const resendActivationEmail = async (req: Request, res: Response) => {
 
       await sendAccountVerificationEmail({
         email,
-        name: designer.name,
-        userId: designer?.id,
+        name: company.name,
+        userId: company?.id,
       });
     } else {
       const user = await prisma.user.findUnique({ where: { email } });

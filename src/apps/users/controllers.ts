@@ -9,7 +9,7 @@ export const getUsers = async (
   next: NextFunction
 ) => {
   try {
-    const designerId = req.designer;
+    const designerId = req.company;
     const users = await prisma.user.findMany({
       where: { designerId: designerId },
     });
@@ -31,7 +31,7 @@ export const createUser = async (
   next: NextFunction
 ) => {
   try {
-    const designerId = req.designer || "";
+    const designerId = req.company || "";
     const { firstName, lastName, email, password } = req.body;
     const user = await prisma.user.create({
       data: {

@@ -41,12 +41,12 @@ const createOrFindUser = async (
 };
 
 const createOrFindDesigner = async (profile: any, provider: string) => {
-  let designer = await prisma.designer.findUnique({
+  let company = await prisma.company.findUnique({
     where: { email: profile.emails[0].value },
   });
 
-  if (!designer) {
-    designer = await prisma.designer.create({
+  if (!company) {
+    company = await prisma.company.create({
       data: {
         email: profile.emails[0].value,
         password: "",
@@ -56,7 +56,7 @@ const createOrFindDesigner = async (profile: any, provider: string) => {
     });
   }
 
-  return designer;
+  return company;
 };
 
 const authenticateUserOrDesigner = async (
@@ -70,8 +70,8 @@ const authenticateUserOrDesigner = async (
     const { role, designerId } = req.query;
 
     if (role === designerType) {
-      const designer = await createOrFindDesigner(profile, profile.provider);
-      return done(null, designer);
+      const company = await createOrFindDesigner(profile, profile.provider);
+      return done(null, company);
     } else if (role === userType && designerId) {
       const user = await createOrFindUser(
         profile,
@@ -81,7 +81,7 @@ const authenticateUserOrDesigner = async (
       return done(null, user);
     }
 
-    return done(new Error("Invalid role or missing designer"), null);
+    return done(new Error("Invalid role or missing company"), null);
   } catch (error) {
     return done(error, null);
   }

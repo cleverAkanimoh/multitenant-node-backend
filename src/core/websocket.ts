@@ -23,11 +23,11 @@ export const setupWebSocketServer = (server: HTTPServer) => {
       const userId = decoded.id;
 
       const user = prisma.user.findUnique({ where: { id: decoded.id } });
-      const designer = prisma.designer.findUnique({
+      const company = prisma.company.findUnique({
         where: { id: decoded.id },
       });
 
-      const validUser = user || designer;
+      const validUser = user || company;
 
       if (!validUser) return next(new Error("Invalid token"));
 

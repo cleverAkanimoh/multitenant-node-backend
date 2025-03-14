@@ -8,9 +8,9 @@ import tenantMiddleware from "../../middlewares/tenantMiddleware";
 
 const router = Router();
 
-router.post("/register-designer", designerController.registerDesigner);
-router.post("/login-designer", designerController.loginDesigner);
-router.get("/current-designer", designerController.getCurrentDesigner);
+router.post("/register-company", designerController.registerDesigner);
+router.post("/login-company", designerController.loginDesigner);
+router.get("/current-company", designerController.getCurrentDesigner);
 
 router.post("/register", tenantMiddleware, userController.registerUser);
 router.post("/login", tenantMiddleware, userController.login);

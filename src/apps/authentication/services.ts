@@ -7,6 +7,8 @@ import { customSendMail } from "../../utils/customSendMail";
 import { generateEmailTemplate } from "../../utils/generateEmailTemplate";
 import { designerType } from "../../core/constants";
 
+import { PrismaClient, Role } from "@prisma/client";
+
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export const generateJwtToken = (
@@ -66,7 +68,7 @@ export const resetPassword = async (
     const hashedPassword = await hashPassword(newPassword);
 
     if (type === designerType) {
-      await prisma.designer.update({
+      await prisma.company.update({
         where: { id },
         data: { password: hashedPassword },
       });
@@ -106,3 +108,70 @@ export const generateToken = (userId: string, designerId: string): string => {
 export const verifyToken = (token: string) => {
   return jwt.verify(token, JWT_SECRET);
 };
+
+interface CreateUserInput {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  password: string;
+  userRole?: Role;
+  isActive?: boolean;
+  isStaff?: boolean;
+  isSuperuser?: boolean;
+  isRegistrationSent?: boolean;
+}
+
+export async function createUser(input: CreateUserInput) {
+  if (!input.email) throw new Error("Email is required");
+
+  const hashedPassword = await bcrypt.hash(input.password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      phoneNumber: input.phoneNumber,
+      password: hashedPassword,
+      userRole: input.userRole || Role.EMPLOYEE,
+      isActive: input.isActive ?? false,
+      isStaff: input.isStaff ?? false,
+      isSuperuser: input.isSuperuser ?? false,
+      isRegistrationSent: input.isRegistrationSent ?? false,
+    },
+  });
+
+  return user;
+}
+
+// Create a staff user
+export async function createStaff(input: CreateUserInput) {
+  return createUser({
+    ...input,
+    userRole: Role.ADMIN,
+    isStaff: true,
+    isActive: true,
+  });
+}
+
+// Create an admin user
+export async function createAdmin(input: CreateUserInput) {
+  return createUser({
+    ...input,
+    userRole: Role.ADMIN_HR,
+    isStaff: true,
+    isActive: true,
+  });
+}
+
+// Create a superuser
+export async function createSuperuser(input: CreateUserInput) {
+  return createUser({
+    ...input,
+    userRole: Role.SUPER_ADMIN,
+    isStaff: true,
+    isActive: true,
+    isSuperuser: true,
+  });
+}

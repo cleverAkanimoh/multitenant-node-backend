@@ -27,7 +27,7 @@
         }
       }
     },
-    "/auth/register-designer": {
+    "/auth/register-company": {
       "post": {
         "description": "",
         "parameters": [
@@ -63,7 +63,7 @@
         }
       }
     },
-    "/auth/login-designer": {
+    "/auth/login-company": {
       "post": {
         "description": "",
         "parameters": [
@@ -99,7 +99,7 @@
         }
       }
     },
-    "/auth/current-designer": {
+    "/auth/current-company": {
       "get": {
         "description": "",
         "parameters": [

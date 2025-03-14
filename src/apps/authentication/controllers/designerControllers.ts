@@ -24,7 +24,7 @@ export const registerDesigner = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
-    const existingDesigner = await prisma.designer.findUnique({
+    const existingDesigner = await prisma.company.findUnique({
       where: { name },
     });
     if (existingDesigner) {
@@ -37,7 +37,7 @@ export const registerDesigner = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await hashPassword(password);
-    const newDesigner = await prisma.designer.create({
+    const newDesigner = await prisma.company.create({
       data: {
         name,
         email,
@@ -82,9 +82,9 @@ export const loginDesigner = async (req: Request, res: Response) => {
 
   try {
     const { email, password } = req.body;
-    const designer = await prisma.designer.findUnique({ where: { email } });
+    const company = await prisma.company.findUnique({ where: { email } });
 
-    if (!designer || !(await verifyPassword(password, designer.password))) {
+    if (!company || !(await verifyPassword(password, company.password))) {
       return res
         .status(401)
         .json(
@@ -92,7 +92,7 @@ export const loginDesigner = async (req: Request, res: Response) => {
         );
     }
 
-    const token = generateJwtToken(designer.id, { expiresIn: "24d" });
+    const token = generateJwtToken(company.id, { expiresIn: "24d" });
 
     const response = res.json(
       customResponse({
@@ -144,11 +144,11 @@ export const getCurrentDesigner = async (req: Request, res: Response) => {
       );
     }
 
-    const designer = await prisma.designer.findUnique({
+    const company = await prisma.company.findUnique({
       where: { id: decoded.id },
     });
 
-    if (!designer) {
+    if (!company) {
       return res.status(404).json(
         customResponse({
           message: "Designer not found",
@@ -161,8 +161,8 @@ export const getCurrentDesigner = async (req: Request, res: Response) => {
       customResponse({
         message: "Designer retrieved successfully",
         data: {
-          ...designer,
-          hasCompletedProfile: !!designer.bio && !!designer.website,
+          ...company,
+          hasCompletedProfile: !!company.bio && !!company.website,
         },
         statusCode: 200,
       })
@@ -170,7 +170,7 @@ export const getCurrentDesigner = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json(
       customResponse({
-        message: "Failed to retrieve designer",
+        message: "Failed to retrieve company",
         statusCode: 500,
         data: error,
       })

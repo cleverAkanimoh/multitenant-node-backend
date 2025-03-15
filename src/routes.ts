@@ -4,7 +4,6 @@ import { baseUrl } from "./core/configs";
 import swaggerUi from "swagger-ui-express";
 import redoc from "redoc-express";
 
-import userRoutes from "./apps/users/routes";
 import authRoutes from "./apps/authentication/routes";
 import storageRoutes from "./apps/storage/routes";
 
@@ -19,7 +18,6 @@ export const configAppRoutes = (app: Express) => {
   app.get("/redoc", redoc(redocConfig));
 
   app.use("/auth", authRoutes);
-  app.use("/users", userRoutes);
   app.use("/storage", storageRoutes);
 
   console.log("All endpoints started at " + baseUrl);

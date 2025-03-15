@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "NUI Fashion API Documentation",
+    "title": "Emetrics Suite API Documentation",
     "version": "1.0.0",
-    "description": "API documentation for Nui Fashion SaaS"
+    "description": "API documentation for Emetrics Suite"
   },
   "host": "localhost:7000",
   "servers": [

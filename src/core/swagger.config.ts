@@ -15,7 +15,7 @@ const doc = {
   info: {
     title: docTitle,
     version: "1.0.0",
-    description: "API documentation for Nui Fashion SaaS",
+    description: "API documentation for Emetrics Suite",
   },
   host: baseUrl.replace(/^https?:\/\//, ""),
   basePath: "/",

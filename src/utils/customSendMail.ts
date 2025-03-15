@@ -1,26 +1,36 @@
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
-const EMAIL_USER = process.env.EMAIL_USER as string;
-const EMAIL_PASS = process.env.EMAIL_PASS as string;
+const SENDINBLUE_API_KEY = process.env.SENDINBLUE_API_KEY as string;
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-});
-export default transporter;
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications["api-key"];
+apiKey.apiKey = SENDINBLUE_API_KEY;
+
+const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
 export const customSendMail = async ({
   email,
   html,
   subject,
-  from = `NUI Fashion <${EMAIL_USER}>`,
+  from = {
+    email: process.env.EMAIL_USER,
+    name: "E-Metrics Suite",
+  },
 }: {
   email: string;
   html: string;
   subject: string;
-  from?: string;
+  from?: object;
 }) => {
-  await transporter.sendMail({ from, to: email, subject, html });
+  sendSmtpEmail.sender = from;
+  sendSmtpEmail.to = [{ email }];
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = html;
+
+  try {
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 };

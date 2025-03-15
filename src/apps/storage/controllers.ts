@@ -1,66 +1,31 @@
-import { Request, Response } from "express";
-import { supabase } from "../../core/supabaseClient";
+import { Request, Response, NextFunction } from "express";
+import cloudinary from "cloudinary";
+import { cloudinaryUploader } from "./utils/uploader";
 import { customResponse } from "../../utils/customResponse";
-import { publicBucketName } from "../../core/constants";
 
-export const uploadFiles = async (req: Request, res: Response) => {
+cloudinary.v2.config({
+  cloudinary_url: process.env.CLOUDINARY_URL,
+});
+
+export const uploadFile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    const { originalname, buffer, mimetype } = req.file;
-
-    const filePath = `uploads/${Date.now()}_${originalname}`;
-
-    const { data, error } = await supabase.storage
-      .from(publicBucketName)
-      .upload(filePath, buffer, { contentType: mimetype });
-
-    if (error) throw error;
-
-    const { data: publicUrlData } = supabase.storage
-      .from(publicBucketName)
-      .getPublicUrl(filePath);
-
-    return res.json(
+    if (!req.file)
+      return res
+        .status(400)
+        .json(customResponse({ message: "No file uploaded", statusCode: 400 }));
+    const result = await cloudinaryUploader(req.file.path);
+    res.json(
       customResponse({
-        message: "",
-        data: { url: publicUrlData.publicUrl },
         statusCode: 200,
+        message: "File uploaded successfully",
+        data: result.secure_url,
       })
     );
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
-};
-
-export const retrieveFile = async (req: Request, res: Response) => {
-  const { filename } = req.params;
-
-  const { data } = supabase.storage
-    .from(publicBucketName)
-    .getPublicUrl(`uploads/${filename}`);
-
-  return res.json(
-    customResponse({
-      message: `${filename} retrieved successfully`,
-      data: { url: data.publicUrl },
-      statusCode: 200,
-    })
-  );
-};
-
-export const deleteFile = async (req: Request, res: Response) => {
-  const { filename } = req.params;
-
-  const { error } = await supabase.storage
-    .from(publicBucketName)
-    .remove([`uploads/${filename}`]);
-
-  if (error) {
-    return res.status(500).json({ error: error.message });
-  }
-
-  return res.json({ message: "File deleted successfully" });
 };

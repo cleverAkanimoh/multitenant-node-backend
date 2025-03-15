@@ -1,14 +1,9 @@
-import express from "express";
-import { upload } from "./uploadMiddleware";
+import { Router } from "express";
+import { uploadFile } from "./controllers";
+import uploadMiddleware from "./uploadMiddleware";
 
-import * as controller from "./controllers"
+const router = Router();
 
-const router = express.Router();
-
-router.post("/upload", upload.single("file"), controller.uploadFiles);
-
-router.get("/file/:filename", controller.retrieveFile);
-
-router.delete("/delete/:filename", controller.deleteFile);
+router.post("/upload", uploadMiddleware.single("file") as any, uploadFile);
 
 export default router;

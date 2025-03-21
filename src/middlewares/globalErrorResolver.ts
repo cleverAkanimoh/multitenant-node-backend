@@ -1,6 +1,11 @@
-import { NextFunction, Response, Request } from "express";
+import { NextFunction, Request, Response } from "express";
+import {
+  BaseError,
+  ConnectionError,
+  DatabaseError,
+  ValidationError,
+} from "sequelize";
 import { customResponse } from "../utils/customResponse";
-import { Prisma } from "@prisma/client";
 
 export const globalErrorResolver = (
   err: Error,
@@ -10,18 +15,19 @@ export const globalErrorResolver = (
 ) => {
   console.error("🔥 Unexpected Error:", err);
   console.error(err.stack);
-  // Handle Prisma Errors
-  if (err instanceof Prisma.PrismaClientInitializationError) {
+
+  // Handle Database Connection Errors
+  if (err instanceof ConnectionError) {
     return res.status(500).json(
       customResponse({
-        message:
-          "Database connection failed. Please check your database settings.",
+        message: "Database connection failed. Please check your settings.",
         statusCode: 500,
       })
     );
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  // Handle General Database Errors
+  if (err instanceof DatabaseError) {
     return res.status(400).json(
       customResponse({
         message: `Database error: ${err.message}`,
@@ -30,10 +36,22 @@ export const globalErrorResolver = (
     );
   }
 
-  if (err instanceof Prisma.PrismaClientUnknownRequestError) {
+  // Handle Validation Errors (e.g., Unique Constraint, Not Null Violation)
+  if (err instanceof ValidationError) {
+    return res.status(400).json(
+      customResponse({
+        message:
+          "Validation error: " + err.errors.map((e) => e.message).join(", "),
+        statusCode: 400,
+      })
+    );
+  }
+
+  // Handle Other Sequelize Errors
+  if (err instanceof BaseError) {
     return res.status(500).json(
       customResponse({
-        message: "Unknown database error occurred.",
+        message: `Sequelize error: ${err.message}`,
         statusCode: 500,
       })
     );
@@ -47,4 +65,3 @@ export const globalErrorResolver = (
     })
   );
 };
-

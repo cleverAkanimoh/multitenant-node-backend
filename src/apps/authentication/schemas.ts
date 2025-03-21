@@ -1,31 +1,27 @@
 import Joi from "joi";
 
 const passName = {
-  name: "Password has to contain an uppercase lowercases letters, numbers and special characters",
+  name: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
 };
 
 export const userSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  designerId: Joi.string().required(),
-});
-
-export const designerSchema = Joi.object({
+  id: Joi.string().optional(),
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string()
+    .min(6)
     .pattern(
       new RegExp(
         "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"
-      ),
-      passName
+      )
     )
-    .required(),
-  bio: Joi.string().optional(),
-  website: Joi.string().uri().optional(),
-  socials: Joi.array().items(Joi.string().uri()).optional(),
+    .required()
+    .messages({
+      "string.pattern.base": passName,
+    }),
+  userRole: Joi.string().optional(),
+  isStaff: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
 });
 
 export const loginSchema = Joi.object({
@@ -38,4 +34,29 @@ export const loginSchema = Joi.object({
       passName
     )
     .required(),
+});
+
+export const changePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string().min(6).required(),
+});
+
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+  type: Joi.string().valid("user", "company").required(),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string().min(6).required(),
+  type: Joi.string().valid("user", "company").required(),
+});
+
+export const resendActivationEmailSchema = Joi.object({
+  email: Joi.string().email().required(),
+  type: Joi.string().valid("user", "company").required(),
+});
+
+export const verifyAccountSchema = Joi.object({
+  token: Joi.string().required(),
 });

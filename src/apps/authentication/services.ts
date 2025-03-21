@@ -1,13 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { prisma } from "../../core/prisma";
 import { frontendUrl } from "../../core/configs";
+import { TToken } from "../../types/token";
 import { customSendMail } from "../../utils/customSendMail";
 import { generateEmailTemplate } from "../../utils/generateEmailTemplate";
-import { designerType } from "../../core/constants";
-
-import { PrismaClient, Role } from "@prisma/client";
 
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -19,7 +16,7 @@ export const generateJwtToken = (
 };
 
 export const verifyJwtToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET) as { id: string };
+  return jwt.verify(token, JWT_SECRET) as TToken;
 };
 
 export const sendAccountVerificationEmail = async ({
@@ -37,11 +34,11 @@ export const sendAccountVerificationEmail = async ({
 
   await customSendMail({
     email: email,
-    subject: "Activate Your Nui Fashion Account",
+    subject: "Activate Your E-Metrics Account",
     html: generateEmailTemplate({
-      title: "Welcome to Nui Fashion!",
+      title: "Welcome to E-Metrics Suite!",
       message: `Hello ${
-        name || email
+        name || email.split(" ")[0]
       }, click the button below to activate your account:`,
       buttonText: "Activate Account",
       buttonLink: activationLink,
@@ -56,33 +53,6 @@ export const sendResetEmail = async (email: string, token: string) => {
     email,
     subject: "Password Reset Request",
   });
-};
-
-export const resetPassword = async (
-  token: string,
-  newPassword: string,
-  type?: string
-) => {
-  try {
-    const { id } = verifyJwtToken(token);
-    const hashedPassword = await hashPassword(newPassword);
-
-    if (type === designerType) {
-      await prisma.company.update({
-        where: { id },
-        data: { password: hashedPassword },
-      });
-    } else {
-      await prisma.user.update({
-        where: { id },
-        data: { password: hashedPassword },
-      });
-    }
-
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
 
 // Hash password before saving user
@@ -100,78 +70,11 @@ export const verifyPassword = async (
 };
 
 // Generate JWT token
-export const generateToken = (userId: string, designerId: string): string => {
-  return jwt.sign({ userId, designerId }, JWT_SECRET, { expiresIn: "7d" });
+export const generateToken = (userId: string, tenantId: string): string => {
+  return jwt.sign({ userId, tenantId }, JWT_SECRET, { expiresIn: "7d" });
 };
 
 // Verify JWT token
 export const verifyToken = (token: string) => {
   return jwt.verify(token, JWT_SECRET);
 };
-
-interface CreateUserInput {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  password: string;
-  userRole?: Role;
-  isActive?: boolean;
-  isStaff?: boolean;
-  isSuperuser?: boolean;
-  isRegistrationSent?: boolean;
-}
-
-export async function createUser(input: CreateUserInput) {
-  if (!input.email) throw new Error("Email is required");
-
-  const hashedPassword = await bcrypt.hash(input.password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email: input.email,
-      firstName: input.firstName,
-      lastName: input.lastName,
-      phoneNumber: input.phoneNumber,
-      password: hashedPassword,
-      userRole: input.userRole || Role.EMPLOYEE,
-      isActive: input.isActive ?? false,
-      isStaff: input.isStaff ?? false,
-      isSuperuser: input.isSuperuser ?? false,
-      isRegistrationSent: input.isRegistrationSent ?? false,
-    },
-  });
-
-  return user;
-}
-
-// Create a staff user
-export async function createStaff(input: CreateUserInput) {
-  return createUser({
-    ...input,
-    userRole: Role.ADMIN,
-    isStaff: true,
-    isActive: true,
-  });
-}
-
-// Create an admin user
-export async function createAdmin(input: CreateUserInput) {
-  return createUser({
-    ...input,
-    userRole: Role.ADMIN_HR,
-    isStaff: true,
-    isActive: true,
-  });
-}
-
-// Create a superuser
-export async function createSuperuser(input: CreateUserInput) {
-  return createUser({
-    ...input,
-    userRole: Role.SUPER_ADMIN,
-    isStaff: true,
-    isActive: true,
-    isSuperuser: true,
-  });
-}

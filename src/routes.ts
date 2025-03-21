@@ -1,17 +1,20 @@
 import { Express } from "express";
 import { baseUrl } from "./core/configs";
 
-import swaggerUi from "swagger-ui-express";
 import redoc from "redoc-express";
+import swaggerUi from "swagger-ui-express";
 
 import authRoutes from "./apps/authentication/routes";
 import storageRoutes from "./apps/storage/routes";
 
 import generateSwaggerDocs, { redocConfig } from "./core/swagger.config";
 
+import path from "path";
 import schema from "./swagger.json";
 
-export const configAppRoutes = (app: Express) => {
+export const configAppRoutes = (app: Express, express: any) => {
+  // static
+  app.use("/statics", express.static(path.join(__dirname, "public")));
   // Documentation
   generateSwaggerDocs(app);
   app.use("/docs", swaggerUi.serve as any, swaggerUi.setup(schema) as any);

@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export interface AuthRequest extends Request {
-  user?: { userId: string; designerId: string };
+  user?: { userId: string; tenantId: string };
 }
 
 export const authenticate = (
@@ -12,13 +12,13 @@ export const authenticate = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.header("Authorization")?.split(" ")[1]; // Bearer Token
+  const token = req.header("Authorization")?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Access denied" });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as {
       userId: string;
-      designerId: string;
+      tenantId: string;
     };
     req.user = decoded;
     next();

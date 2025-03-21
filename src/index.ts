@@ -2,17 +2,19 @@ import dotenv from "dotenv";
 
 import express from "express";
 
-import { configAppRoutes } from "./routes";
-import { configureMiddleware } from "./middlewares";
-import corsSetup from "./core/corsSetup";
 import { createServer } from "http";
-import { setupWebSocketServer } from "./core/websocket";
+import corsSetup from "./core/corsSetup";
 import sequelize from "./core/orm";
+import { setupWebSocketServer } from "./core/websocket";
+import { configureMiddleware } from "./middlewares";
+import { configAppRoutes } from "./routes";
 
 dotenv.config();
 
 const app = express();
 const server = createServer(app);
+
+// json
 app.use(express.json());
 
 // cors
@@ -25,17 +27,25 @@ configureMiddleware(app);
 setupWebSocketServer(server);
 
 // Routes
-configAppRoutes(app);
+configAppRoutes(app, express);
 
 const PORT = process.env.PORT || 8000;
-sequelize
-  .sync({ alter: true })
-  .then(() => {
-    console.log("Database connected and models synced.");
-    app.listen(PORT, () => {
+
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected successfully.");
+
+    await sequelize.sync({
+      alter: true,
+      force: process.env.NODE_ENV === "development",
+    });
+    console.log("✅ All models synchronized.");
+
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("Database sync error:", err);
-  });
+  } catch (error) {
+    console.error("❌ Database connection error:", error);
+  }
+})();

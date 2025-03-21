@@ -1,37 +1,30 @@
-import { Server as SocketIOServer, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
+import { Socket, Server as SocketIOServer } from "socket.io";
 import { verifyJwtToken } from "../apps/authentication/services";
-import { prisma } from "./prisma";
+import User from "../apps/users/models/user";
 
-const clients = new Map<string, Socket>(); // Map userId to Socket connection
+const clients = new Map<string, Socket>();
 
 export const setupWebSocketServer = (server: HTTPServer) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: ["http://localhost:3000", "https://nuifashion.vercel.app"],
+      origin: ["http://localhost:3000", "https://emetrics.netlify.app"],
     },
   });
 
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("Authentication failed"));
 
     try {
-      const decoded = verifyJwtToken(token) as {
-        id: string;
-      };
+      const decoded = verifyJwtToken(token);
       const userId = decoded.id;
 
-      const user = prisma.user.findUnique({ where: { id: decoded.id } });
-      const company = prisma.company.findUnique({
-        where: { id: decoded.id },
-      });
+      const user = await User.findByPk(userId);
 
-      const validUser = user || company;
+      if (!user) return next(new Error("Invalid token"));
 
-      if (!validUser) return next(new Error("Invalid token"));
-
-      (socket as any).userId = decoded.id;
+      (socket as any).userId = userId;
       next();
     } catch (error) {
       next(new Error("Invalid token"));
@@ -58,7 +51,6 @@ export const setupWebSocketServer = (server: HTTPServer) => {
   return io;
 };
 
-// Function to send a message to a specific user
 export const sendToUser = (userId: string, message: object) => {
   const socket = clients.get(userId);
   if (socket) {

@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import User from "../users/models/user";
+import { verifyJwtToken } from "./services";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export interface AuthRequest extends Request {
-  user?: { userId: string; tenantId: string };
+  user?: User;
 }
 
-export const authenticate = (
+export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -16,11 +17,10 @@ export const authenticate = (
   if (!token) return res.status(401).json({ error: "Access denied" });
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      userId: string;
-      tenantId: string;
-    };
-    req.user = decoded;
+    const decoded = verifyJwtToken(token);
+    const user = await User.findByPk(decoded.id);
+    if (!user) throw new Error("No user found in request");
+    req.user = user;
     next();
   } catch (error) {
     res.status(401).json({ error: "Invalid token" });

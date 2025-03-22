@@ -25,7 +25,6 @@ export const createStaff = async (input: UserCreationAttributes) => {
   return createUser({
     ...input,
     userRole: Roles.STAFF,
-    isStaff: true,
     isActive: true,
   });
 };
@@ -35,7 +34,6 @@ export const createAdmin = async (input: UserCreationAttributes) => {
   return createUser({
     ...input,
     userRole: Roles.ADMIN,
-    isStaff: true,
     isActive: true,
   });
 };
@@ -45,7 +43,6 @@ export const createSuperuser = async (input: UserCreationAttributes) => {
   return createUser({
     ...input,
     userRole: Roles.SUPERADMIN,
-    isStaff: true,
     isActive: true,
   });
 };

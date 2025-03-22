@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { Roles } from "../users/models/user";
 
 const passName = {
   name: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
@@ -8,6 +9,7 @@ export const userSchema = Joi.object({
   id: Joi.string().optional(),
   name: Joi.string().required(),
   email: Joi.string().email().required(),
+  tenantId: Joi.string().required(),
   password: Joi.string()
     .min(6)
     .pattern(
@@ -19,9 +21,16 @@ export const userSchema = Joi.object({
     .messages({
       "string.pattern.base": passName,
     }),
-  userRole: Joi.string().optional(),
+  userRole: Joi.string()
+    .valid(...Object.values(Roles))
+    .required()
+    .messages({
+      "any.only": "User role must be one of 'employee', 'hr', or 'employer'.",
+    }),
   isStaff: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
+  mfaSecret: Joi.string().optional(),
+  isMfaEnabled: Joi.boolean().optional(),
 });
 
 export const loginSchema = Joi.object({

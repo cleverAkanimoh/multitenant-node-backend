@@ -14,11 +14,11 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 
-// json
-app.use(express.json());
-
 // cors
 corsSetup(app);
+
+// json
+app.use(express.json());
 
 // Middlewares
 configureMiddleware(app);

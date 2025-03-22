@@ -2,14 +2,14 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../core/orm";
 
 export enum Roles {
-  STAFF = "staff",
-  ADMIN = "admin",
-  USER = "user",
-  SUPERADMIN = "super_admin",
+  STAFF = "employee",
+  ADMIN = "hr",
+  SUPERADMIN = "employer",
 }
 
 export interface UserAttributes {
   id: string;
+  tenantId: string;
   name: string;
   email: string;
   password: string;
@@ -18,7 +18,7 @@ export interface UserAttributes {
   isStaff?: boolean;
   isActive?: boolean;
   isMfaEnabled?: boolean;
-  tenantId?: string;
+  deletedAt?: Date;
 }
 
 export interface UserCreationAttributes
@@ -29,6 +29,7 @@ class User
   implements UserAttributes
 {
   public id!: string;
+  public tenantId!: string;
   public name!: string;
   public email!: string;
   public password!: string;
@@ -37,7 +38,7 @@ class User
   public isStaff?: boolean;
   public isActive?: boolean;
   public isMfaEnabled?: boolean;
-  public tenantId?: string;
+  public deletedAt?: Date;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -78,7 +79,11 @@ User.init(
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     isMfaEnabled: {
       type: DataTypes.BOOLEAN,

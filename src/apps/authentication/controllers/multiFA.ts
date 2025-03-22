@@ -1,9 +1,8 @@
 import { Response } from "express";
-import speakeasy from "speakeasy";
 import QRCode from "qrcode";
-import { AuthRequest } from "../middlewares";
+import speakeasy from "speakeasy";
 import { customResponse } from "../../../utils/customResponse";
-import User from "../../users/models/user";
+import { AuthRequest } from "../middlewares";
 
 // Helper function to get the authenticated user
 const getAuthenticatedUser = async (req: AuthRequest, res: Response) => {
@@ -14,7 +13,7 @@ const getAuthenticatedUser = async (req: AuthRequest, res: Response) => {
     return null;
   }
 
-  const user = await User.findByPk(req.user.userId);
+  const user = req.user;
   if (!user) {
     res
       .status(404)

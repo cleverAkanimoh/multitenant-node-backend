@@ -1,19 +1,19 @@
 import { Router } from "express";
 import * as userController from "./controllers/userControllers";
 
-import tenantMiddleware from "../../middlewares/tenantMiddleware";
 import * as multiFAController from "./controllers/multiFA";
 import { authenticate } from "./middlewares";
 
 const router = Router();
 
-router.post("/register", tenantMiddleware, userController.registerUser);
-router.post("/login", tenantMiddleware, userController.login);
-router.get("/current-user", tenantMiddleware, userController.getCurrentUser);
+router.post("/register", userController.registerUser);
+router.post("/login", userController.login);
+router.post("/logout", userController.logout);
+router.get("/current-user", userController.getCurrentUser);
 
 router.post("/verify-account", userController.activateAccount);
-// router.post("/forgot-password", userController.forgotPassword);
-// router.post("/reset-password", userController.resetUserPassword);
+router.post("/forgot-password", userController.forgotPassword);
+router.post("/reset-password", userController.resetPassword);
 router.post(
   "/change-password",
   authenticate as any,

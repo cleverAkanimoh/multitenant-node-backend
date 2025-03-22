@@ -5,6 +5,7 @@ import { frontendUrl } from "../../core/configs";
 import { TToken } from "../../types/token";
 import { customSendMail } from "../../utils/customSendMail";
 import { generateEmailTemplate } from "../../utils/generateEmailTemplate";
+import User from "../users/models/user";
 
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -46,11 +47,18 @@ export const sendAccountVerificationEmail = async ({
   });
 };
 
-export const sendResetEmail = async (email: string, token: string) => {
+export const sendResetEmail = async (user: User, token: string) => {
   const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
   await customSendMail({
-    html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. The link expires in 1 hour.</p>`,
-    email,
+    html: generateEmailTemplate({
+      title: "Welcome to E-Metrics Suite!",
+      message: `Hello ${
+        user.name || user.email.split(" ")[0]
+      }, click the button below to reset your account password`,
+      buttonText: "Reset Password",
+      buttonLink: resetUrl,
+    }),
+    email: user.email,
     subject: "Password Reset Request",
   });
 };

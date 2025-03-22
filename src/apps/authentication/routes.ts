@@ -9,7 +9,7 @@ const router = Router();
 router.post("/register", userController.registerUser);
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
-router.get("/current-user", userController.getCurrentUser);
+router.get("/current-user", authenticate as any, userController.getCurrentUser);
 
 router.post("/verify-account", userController.activateAccount);
 router.post("/forgot-password", userController.forgotPassword);

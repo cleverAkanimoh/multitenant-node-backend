@@ -2,9 +2,25 @@ import { withTransaction } from "../../utils/withTransaction";
 import { hashPassword } from "../authentication/services";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
-export const getSingleUser = async (email: string, pk?: string) => {
-  if (pk) return await User.findByPk(pk);
-  return await User.findOne({ where: { email } });
+export const findUserById = async (id: string, attributes?: string[]) => {
+  return User.findByPk(id, { attributes });
+};
+
+export const findUserByEmail = async (email: string) => {
+  return User.findOne({ where: { email } });
+};
+
+export const cleanUserData = (user: User) => {
+  const [firstName, lastName] = user.name.split(" ");
+  return {
+    id: user.id,
+    name: user.name,
+    firstName,
+    lastName,
+    role: user.userRole,
+    tenantId: user.tenantId,
+    email: user.email,
+  };
 };
 
 export const createUser = async (userData: UserCreationAttributes) => {

@@ -4,7 +4,11 @@ import { Express } from "express";
 const corsSetup = (app: Express) => {
   app.use(
     cors({
-      origin: ["http://localhost:3000", "http://localhost:7000"],
+      origin: [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+      ],
       optionsSuccessStatus: 200,
       //   exposedHeaders: "",
       //   preflightContinue:true,

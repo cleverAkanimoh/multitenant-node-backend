@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { COOKIE_NAME } from "../../../core/constants";
 import { validateRequest } from "../../../middlewares/validateRequests";
-import { TToken } from "../../../types/token";
 import { customResponse } from "../../../utils/customResponse";
-import { handleRequests } from "../../../utils/handleRequests";
-import User from "../../users/models/user";
-import { createUser, getSingleUser } from "../../users/services";
+import {
+  handleRequests,
+  handleValidationError,
+} from "../../../utils/handleRequests";
+import User, { Roles } from "../../users/models/user";
+import {
+  cleanUserData,
+  createUser,
+  findUserByEmail,
+} from "../../users/services";
 import { AuthRequest } from "../middlewares";
 import {
   changePasswordSchema,
@@ -17,7 +23,6 @@ import {
 import {
   generateToken,
   hashPassword,
-  JWT_SECRET,
   sendResetEmail,
   verifyJwtToken,
   verifyPassword,
@@ -36,93 +41,94 @@ import {
  *           schema:
  *             type: object
  *             properties:
- *               oldPassword:
+ *               name:
  *                 type: string
- *               newPassword:
+ *                 example: "Clever Akanimoh"
+ *               email:
  *                 type: string
+ *                 format: email
+ *                 example: "cleverakanimoh02@gmail.com"
+ *               tenantId:
+ *                 type: string
+ *                 example: "blt"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "User.1234"
+ *               userRole:
+ *                 type: string
+ *                 enum: [admin, employer, user]
+ *                 example: "employer"
+ *               mfaSecret:
+ *                 type: string
+ *                 nullable: true
+ *                 example: null
+ *               isStaff:
+ *                 type: boolean
+ *                 default: false
+ *                 example: false
+ *               isActive:
+ *                 type: boolean
+ *                 default: false
+ *                 example: false
+ *               isMfaEnabled:
+ *                 type: boolean
+ *                 default: false
+ *                 example: false
+ *               deletedAt:
+ *                 type: string
+ *                 format: date-time
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: User created successfully
  *       400:
  *         description: Email is already registered
+ *       500:
+ *         description: Internal Server Error
  */
+
 export const registerUser = [
   validateRequest(userSchema),
   async (req: Request, res: Response) => {
-    const existingUser = await getSingleUser(req.body.email);
+    console.log("Registering user:", req.body);
+    const existingUser = await findUserByEmail(req.body.email);
+    if (existingUser) {
+      return res.status(400).json(
+        customResponse({
+          message: "Email is already registered",
+          statusCode: 400,
+        })
+      );
+    }
+    console.log({ role: Roles.SUPERADMIN, userRole: req.body.userRole });
+
+    if (req.body.userRole === Roles.SUPERADMIN) {
+      console.log("Reached here");
+    }
     return handleRequests(
       createUser(req.body),
       "User created successfully",
-      res,
-      existingUser
-        ? async () =>
-            res.status(400).json(
-              customResponse({
-                message: "Email is already registered",
-                statusCode: 400,
-              })
-            )
-        : undefined
+      res
     );
   },
 ];
-const handleValidationError = (res: Response, error: any) => {
-  return res.status(400).json(
-    customResponse({
-      message: error.details[0].message,
-      statusCode: 400,
-      data: error.details,
-    })
-  );
-};
-
-const findUserById = async (id: string, attributes?: string[]) => {
-  return User.findByPk(id, { attributes });
-};
-
-const findUserByEmail = async (email: string) => {
-  return User.findOne({ where: { email } });
-};
 
 export const activateAccount = async (req: Request, res: Response) => {
-  try {
-    const { token } = req.query;
-    if (!token)
-      return res.status(400).json(
-        customResponse({
-          message: "Invalid activation token",
-          statusCode: 400,
-        })
-      );
+  return handleRequests(
+    (async () => {
+      const { token } = req.query;
+      if (!token) throw new Error("Invalid activation token");
 
-    const decoded = jwt.verify(token as string, JWT_SECRET) as {
-      userId: string;
-    };
+      const decoded = verifyJwtToken(token as string);
+      if (!decoded) throw new Error("Invalid or expired token");
 
-    if (!decoded)
-      return res.status(400).json(
-        customResponse({
-          message: "Invalid or expired token",
-          statusCode: 400,
-        })
-      );
-
-    await User.update({ isActive: true }, { where: { id: decoded.userId } });
-
-    res.json(
-      customResponse({
-        message: "Account activated successfully!",
-        statusCode: 200,
-      })
-    );
-  } catch (error) {
-    res.status(500).json(
-      customResponse({
-        message: "Failed to activate account",
-        statusCode: 500,
-      })
-    );
-  }
+      await User.update({ isActive: true }, { where: { id: decoded.id } });
+      return "Account activated successfully!";
+    })(),
+    null,
+    res
+  );
 };
 
 /**
@@ -148,35 +154,28 @@ export const activateAccount = async (req: Request, res: Response) => {
  *       401:
  *         description: Invalid credentials
  */
+
 export const login = async (req: Request, res: Response) => {
   const { error } = loginSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  try {
-    const { email, password } = req.body;
-    const user = await findUserByEmail(email);
-    if (!user || !(await verifyPassword(password, user.password))) {
-      return res
-        .status(401)
-        .json(
-          customResponse({ message: "Invalid credentials", statusCode: 401 })
-        );
-    }
+  return handleRequests(
+    (async () => {
+      const { email, password } = req.body;
+      const user = await findUserByEmail(email);
+      if (!user || !(await verifyPassword(password, user.password))) {
+        throw new Error("Invalid credentials");
+      }
 
-    const token = generateToken(user.id, "");
-    res.cookie("auth-cookies", token, { httpOnly: true, signed: true });
-    res.json(
-      customResponse({
-        message: "Login was successful",
-        data: { token, user },
-        statusCode: 200,
-      })
-    );
-  } catch (error) {
+      const token = generateToken(user.id, user.tenantId);
+
+      res.cookie(COOKIE_NAME, token, { httpOnly: true, signed: true });
+
+      return { token, user: cleanUserData(user) };
+    })(),
+    "Login was successful",
     res
-      .status(500)
-      .json(customResponse({ message: "Login failed", statusCode: 500 }));
-  }
+  );
 };
 
 /**
@@ -208,44 +207,26 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
   const { error } = changePasswordSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  try {
-    if (!req.user)
-      return res
-        .status(401)
-        .json(customResponse({ message: "Unauthorized", statusCode: 401 }));
+  return handleRequests(
+    (async () => {
+      if (!req.user) throw new Error("Unauthorized");
 
-    const user = req.user;
-    if (!user)
-      return res
-        .status(404)
-        .json(customResponse({ message: "User not found", statusCode: 404 }));
+      const user = req.user;
+      if (!(await verifyPassword(req.body.oldPassword, user.password))) {
+        throw new Error("Old password is incorrect");
+      }
 
-    if (!(await verifyPassword(req.body.oldPassword, user.password))) {
-      return res.status(400).json(
-        customResponse({
-          message: "Old password is incorrect",
-          statusCode: 400,
-        })
+      const hashedPassword = await hashPassword(req.body.newPassword);
+      await User.update(
+        { password: hashedPassword },
+        { where: { id: user.id } }
       );
-    }
 
-    const hashedPassword = await hashPassword(req.body.newPassword);
-    await User.update({ password: hashedPassword }, { where: { id: user.id } });
-
-    res.json(
-      customResponse({
-        message: "Password changed successfully",
-        statusCode: 200,
-      })
-    );
-  } catch (error) {
-    res.status(500).json(
-      customResponse({
-        message: "Failed to change password",
-        statusCode: 500,
-      })
-    );
-  }
+      return "Password changed successfully";
+    })(),
+    null,
+    res
+  );
 };
 
 /**
@@ -259,56 +240,21 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
  *         description: Logout successful
  */
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie("auth-token");
+  res.clearCookie(COOKIE_NAME);
   res.json(customResponse({ message: "Logout successful", statusCode: 200 }));
 };
 
 export const getCurrentUser = async (req: Request, res: Response) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json(
-        customResponse({
-          message: "Unauthorized: No token provided",
-          statusCode: 401,
-        })
-      );
-    }
+  return handleRequests(
+    (async () => {
+      const user = req.user;
+      if (!user) throw new Error("User not found");
 
-    const decoded = verifyJwtToken(authHeader.split(" ")[1]) as { id: string };
-    if (!decoded || !decoded.id) {
-      return res
-        .status(401)
-        .json(customResponse({ message: "Invalid token", statusCode: 401 }));
-    }
-
-    const user = await findUserById(decoded.id, [
-      "id",
-      "firstName",
-      "lastName",
-      "email",
-      "username",
-      "designerId",
-    ]);
-    if (!user)
-      return res
-        .status(404)
-        .json(customResponse({ message: "User not found", statusCode: 404 }));
-
-    res.json(
-      customResponse({
-        message: "User retrieved successfully",
-        data: user,
-        statusCode: 200,
-      })
-    );
-  } catch (error) {
+      return user;
+    })(),
+    "User retrieved successfully",
     res
-      .status(500)
-      .json(
-        customResponse({ message: "Failed to retrieve user", statusCode: 500 })
-      );
-  }
+  );
 };
 
 /**
@@ -334,35 +280,22 @@ export const getCurrentUser = async (req: Request, res: Response) => {
  */
 export const forgotPassword = async (req: Request, res: Response) => {
   const { error } = forgotPasswordSchema.validate(req.body);
-  if (error)
-    return res
-      .status(400)
-      .json(
-        customResponse({ message: error.details[0].message, statusCode: 400 })
-      );
+  if (error) return handleValidationError(res, error);
 
-  try {
-    const { email } = req.body;
-    const user = await getSingleUser(email);
-    if (!user)
-      return res
-        .status(404)
-        .json(customResponse({ message: "User not found", statusCode: 404 }));
+  return handleRequests(
+    (async () => {
+      const { email } = req.body;
+      const user = await findUserByEmail(email);
+      if (!user) throw new Error("User not found");
 
-    const resetToken = generateToken(user.id, "1h");
-    await sendResetEmail(user, resetToken);
+      const resetToken = generateToken(user.id, "1h");
+      await sendResetEmail(user, resetToken);
 
-    res.json(
-      customResponse({ message: "Password reset email sent", statusCode: 200 })
-    );
-  } catch (error) {
-    res.status(500).json(
-      customResponse({
-        message: "Failed to process request",
-        statusCode: 500,
-      })
-    );
-  }
+      return "Password reset email sent";
+    })(),
+    null,
+    res
+  );
 };
 
 /**
@@ -392,38 +325,23 @@ export const forgotPassword = async (req: Request, res: Response) => {
  */
 export const resetPassword = async (req: Request, res: Response) => {
   const { error } = resetPasswordSchema.validate(req.body);
-  if (error)
-    return res
-      .status(400)
-      .json(
-        customResponse({ message: error.details[0].message, statusCode: 400 })
+  if (error) return handleValidationError(res, error);
+
+  return handleRequests(
+    (async () => {
+      const { token, newPassword } = req.body;
+      const decoded = verifyJwtToken(token) as { id: string };
+      if (!decoded) throw new Error("Invalid or expired token");
+
+      const hashedPassword = await hashPassword(newPassword);
+      await User.update(
+        { password: hashedPassword },
+        { where: { id: decoded.id } }
       );
 
-  try {
-    const { token, newPassword } = req.body;
-    const decoded = verifyJwtToken(token) as TToken;
-    if (!decoded)
-      return res.status(400).json(
-        customResponse({
-          message: "Invalid or expired token",
-          statusCode: 400,
-        })
-      );
-
-    const hashedPassword = await hashPassword(newPassword);
-    await User.update(
-      { password: hashedPassword },
-      { where: { id: decoded.id } }
-    );
-
-    res.json(
-      customResponse({ message: "Password reset successful", statusCode: 200 })
-    );
-  } catch (error) {
+      return "Password reset successful";
+    })(),
+    null,
     res
-      .status(500)
-      .json(
-        customResponse({ message: "Failed to reset password", statusCode: 500 })
-      );
-  }
+  );
 };

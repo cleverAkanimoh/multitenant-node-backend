@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import { Express } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -16,6 +17,8 @@ export const configureMiddleware = (app: Express) => {
   app.use(cacheMiddleware);
 
   app.use(globalErrorResolver);
+
+  app.use(cookieParser(process.env.SESSION_SECRET));
 
   // app.use(
   //   session({

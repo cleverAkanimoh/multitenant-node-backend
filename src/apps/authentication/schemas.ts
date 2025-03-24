@@ -1,9 +1,8 @@
 import Joi from "joi";
 import { Roles } from "../users/models/user";
 
-const passName = {
-  name: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-};
+const passName =
+  "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character";
 
 const passwordRegex =
   "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&.]{6,}$";
@@ -12,20 +11,33 @@ const minPasswordLength = 6;
 
 export const userSchema = Joi.object({
   id: Joi.string().optional(),
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  tenantId: Joi.string().required(),
+  name: Joi.string().required().messages({
+    "any.required": "Name is required",
+  }),
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required",
+  }),
+
+  tenantId: Joi.string().required().messages({
+    "any.required": "Tenant ID is required",
+  }),
   password: Joi.string()
     .min(minPasswordLength)
     .pattern(new RegExp(passwordRegex))
-    .required(),
-  // .messages({ "string.pattern.base": passName }),
+    .required()
+    .messages({
+      "string.pattern.base": passName,
+      "string.min": `Password should be at least ${minPasswordLength} characters long.`,
+      "any.required": "Password is required",
+    }),
   userRole: Joi.string()
     .valid(...Object.values(Roles))
-    .required(),
-  // .messages({
-  //   "any.only": "User role must be one of 'employee', 'hr', or 'employer'.",
-  // })
+    .required()
+    .messages({
+      "any.only": "User role must be one of 'employee', 'hr', or 'employer'.",
+      "any.required": "User role is required.",
+    }),
   isStaff: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
   mfaSecret: Joi.string().optional(),
@@ -33,11 +45,19 @@ export const userSchema = Joi.object({
 });
 
 export const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required",
+  }),
   password: Joi.string()
     .min(minPasswordLength)
-    .pattern(new RegExp(passwordRegex), passName)
-    .required(),
+    .pattern(new RegExp(passwordRegex))
+    .required()
+    .messages({
+      "string.pattern.base": passName,
+      "string.min": `Password should be at least ${minPasswordLength} characters long.`,
+      "any.required": "Password is required",
+    }),
 });
 
 export const changePasswordSchema = Joi.object({

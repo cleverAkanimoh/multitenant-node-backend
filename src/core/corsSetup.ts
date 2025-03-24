@@ -17,6 +17,7 @@ const corsSetup = (app: Express) => {
       credentials: true,
     })
   );
+
   console.log("CORS setup successfully");
 };
 

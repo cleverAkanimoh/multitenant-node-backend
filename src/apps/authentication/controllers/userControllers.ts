@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { COOKIE_NAME } from "../../../core/constants";
-import { validateRequest } from "../../../middlewares/validateRequests";
 import { customResponse } from "../../../utils/customResponse";
 import {
   handleRequests,
@@ -9,7 +8,9 @@ import {
 import User, { Roles } from "../../users/models/user";
 import {
   cleanUserData,
-  createUser,
+  createAdmin,
+  createStaff,
+  createSuperAdmin,
   findUserByEmail,
 } from "../../users/services";
 import { AuthRequest } from "../middlewares";
@@ -88,31 +89,34 @@ import {
  *         description: Internal Server Error
  */
 
-export const registerUser = [
-  validateRequest(userSchema),
-  async (req: Request, res: Response) => {
-    console.log("Registering user:", req.body);
-    const existingUser = await findUserByEmail(req.body.email);
-    if (existingUser) {
-      return res.status(400).json(
-        customResponse({
-          message: "Email is already registered",
-          statusCode: 400,
-        })
-      );
-    }
-    console.log({ role: Roles.SUPERADMIN, userRole: req.body.userRole });
+export const registerUser = async (req: Request, res: Response) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) return handleValidationError(res, error);
 
-    if (req.body.userRole === Roles.SUPERADMIN) {
-      console.log("Reached here");
-    }
-    return handleRequests(
-      createUser(req.body),
-      "User created successfully",
-      res
+  const existingUser = await findUserByEmail(req.body.email.toLowerCase());
+
+  if (existingUser) {
+    return res.status(400).json(
+      customResponse({
+        message: "Email is already registered",
+        statusCode: 400,
+      })
     );
-  },
-];
+  }
+  console.log({ role: Roles.SUPERADMIN, userRole: req.body.userRole });
+
+  const isSuperAdmin = req.body.userRole === Roles.SUPERADMIN;
+  const isHr = req.body.userRole === Roles.ADMIN;
+  // const isStaff = req.body.userRole === Roles.STAFF;
+
+  const checkUserRole = isSuperAdmin
+    ? createSuperAdmin(req.body)
+    : isHr
+    ? createAdmin(req.body)
+    : createStaff(req.body);
+
+  return handleRequests(checkUserRole, "Account created successfully", res);
+};
 
 export const activateAccount = async (req: Request, res: Response) => {
   return handleRequests(

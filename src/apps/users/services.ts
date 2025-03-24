@@ -30,34 +30,38 @@ export const createUser = async (userData: UserCreationAttributes) => {
 
   return withTransaction(async (transaction) => {
     return await User.create(
-      { ...userData, password: hashedPassword },
+      {
+        ...userData,
+        email: userData.email.toLowerCase(),
+        password: hashedPassword,
+      },
       { transaction }
     );
   });
 };
 
 // Create a staff user
-export const createStaff = async (input: UserCreationAttributes) => {
+export const createStaff = async (userData: UserCreationAttributes) => {
   return createUser({
-    ...input,
+    ...userData,
     userRole: Roles.STAFF,
     isActive: true,
   });
 };
 
-// Create an admin user
-export const createAdmin = async (input: UserCreationAttributes) => {
+// Create an Hr user
+export const createAdmin = async (userData: UserCreationAttributes) => {
   return createUser({
-    ...input,
+    ...userData,
     userRole: Roles.ADMIN,
     isActive: true,
   });
 };
 
 // Create a superuser
-export const createSuperuser = async (input: UserCreationAttributes) => {
+export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   return createUser({
-    ...input,
+    ...userData,
     userRole: Roles.SUPERADMIN,
     isActive: true,
   });

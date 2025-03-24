@@ -5,28 +5,27 @@ const passName = {
   name: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
 };
 
+const passwordRegex =
+  "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&.]{6,}$";
+
+const minPasswordLength = 6;
+
 export const userSchema = Joi.object({
   id: Joi.string().optional(),
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   tenantId: Joi.string().required(),
   password: Joi.string()
-    .min(6)
-    .pattern(
-      new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"
-      )
-    )
-    .required()
-    .messages({
-      "string.pattern.base": passName,
-    }),
+    .min(minPasswordLength)
+    .pattern(new RegExp(passwordRegex))
+    .required(),
+  // .messages({ "string.pattern.base": passName }),
   userRole: Joi.string()
     .valid(...Object.values(Roles))
-    .required()
-    .messages({
-      "any.only": "User role must be one of 'employee', 'hr', or 'employer'.",
-    }),
+    .required(),
+  // .messages({
+  //   "any.only": "User role must be one of 'employee', 'hr', or 'employer'.",
+  // })
   isStaff: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
   mfaSecret: Joi.string().optional(),
@@ -36,12 +35,8 @@ export const userSchema = Joi.object({
 export const loginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string()
-    .pattern(
-      new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$"
-      ),
-      passName
-    )
+    .min(minPasswordLength)
+    .pattern(new RegExp(passwordRegex), passName)
     .required(),
 });
 

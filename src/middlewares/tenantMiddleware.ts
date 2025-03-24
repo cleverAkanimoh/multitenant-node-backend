@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { customResponse } from "../utils/customResponse";
 
 const tenantMiddleware = (req: Request, res: Response, next: NextFunction) => {

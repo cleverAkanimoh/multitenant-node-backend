@@ -3,14 +3,20 @@ import { Sequelize } from "sequelize";
 
 dotenv.config();
 
-const sequelize = new Sequelize({
+const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: "postgres",
-  host: process.env.DB_HOST,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT),
-  logging: process.env.NODE_ENV === "development",
+  dialectOptions: {
+    ssl:
+      process.env.NODE_ENV !== "development"
+        ? { require: true, rejectUnauthorized: false }
+        : false,
+  },
+  // host: process.env.DB_HOST,
+  // username: process.env.DB_USER,
+  // password: process.env.DB_PASS,
+  // database: process.env.DB_NAME,
+  // port: Number(process.env.DB_PORT),
+  logging: false,
 });
 
 export default sequelize;

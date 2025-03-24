@@ -20,9 +20,9 @@ export const authenticate = async (
     const decoded = verifyJwtToken(token);
 
     const user = await User.findByPk(decoded.userId);
-    if (user) throw new Error("No user found in request");
+    if (!user) throw new Error("No user found in request");
 
-    // req.user = user;
+    req.user = user;
     next();
   } catch (error) {
     debugLog(error);

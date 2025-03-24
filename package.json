@@ -5,11 +5,9 @@
   "license": "MIT",
   "description": "Express backend with multi-tenancy, REST APIs, and TypeScript",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "init-sequelize": "npx sequelize-cli init",
-    "db-migrate": "npx sequelize-cli migration:generate --name init"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

@@ -88,12 +88,12 @@ import {
  *       500:
  *         description: Internal Server Error
  */
-
 export const registerUser = async (req: Request, res: Response) => {
   const { error } = userSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
   const existingUser = await findUserByEmail(req.body.email.toLowerCase());
+
   if (existingUser) {
     return res.status(400).json(
       customResponse({
@@ -127,11 +127,7 @@ export const registerUser = async (req: Request, res: Response) => {
     ? createAdmin(req.body)
     : createStaff(req.body);
 
-  const checkUserType = isSuperAdmin
-    ? "Company"
-    : isHr
-    ? "Hr"
-    : "Staff";
+  const checkUserType = isSuperAdmin ? "Company" : isHr ? "Hr" : "Staff";
 
   return handleRequests({
     promise: checkUserRole,
@@ -150,10 +146,12 @@ export const activateAccount = async (req: Request, res: Response) => {
       const decoded = verifyJwtToken(token as string);
       if (!decoded) throw new Error("Invalid or expired token");
 
-      await User.update({ isActive: true }, { where: { id: decoded.id } });
-      return "Account activated successfully!";
+      return await User.update(
+        { isActive: true },
+        { where: { id: decoded.id } }
+      );
     })(),
-    message: null,
+    message: "Account activated successfully!",
     res,
   });
 };

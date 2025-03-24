@@ -34,6 +34,7 @@ export const createUser = async (userData: UserCreationAttributes) => {
         ...userData,
         email: userData.email.toLowerCase(),
         password: hashedPassword,
+        isActive: false,
       },
       { transaction }
     );
@@ -45,7 +46,6 @@ export const createStaff = async (userData: UserCreationAttributes) => {
   return createUser({
     ...userData,
     userRole: Roles.STAFF,
-    isActive: true,
   });
 };
 
@@ -54,7 +54,6 @@ export const createAdmin = async (userData: UserCreationAttributes) => {
   return createUser({
     ...userData,
     userRole: Roles.ADMIN,
-    isActive: true,
   });
 };
 
@@ -63,6 +62,5 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   return createUser({
     ...userData,
     userRole: Roles.SUPERADMIN,
-    isActive: true,
   });
 };

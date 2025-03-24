@@ -1,5 +1,6 @@
 import cors from "cors";
 import { Express } from "express";
+import { debugLog } from "../utils/debugLog";
 
 const corsSetup = (app: Express) => {
   app.use(
@@ -18,7 +19,7 @@ const corsSetup = (app: Express) => {
     })
   );
 
-  console.log("CORS setup successfully");
+  debugLog("CORS setup successfully");
 };
 
 export default corsSetup;

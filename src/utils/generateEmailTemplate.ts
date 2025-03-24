@@ -19,5 +19,9 @@ export const generateEmailTemplate = ({
       ${buttonText}
     </a>
     <p>If you didn't request this, please ignore this email.</p>
+    <br/>
+    <br/>
+    <p>Thanks,</p> 
+    <p>The E-Metrics Team</p>
   </div>
 `;

@@ -5,6 +5,7 @@ import redoc from "redoc-express";
 import swaggerJSDoc from "swagger-jsdoc";
 
 import { baseUrl, docTitle } from "./configs";
+import { debugLog } from "../utils/debugLog";
 
 const endpointsFiles = [
   "./src/apps/**/routes.ts",
@@ -43,7 +44,7 @@ export const redocConfig = { title: docTitle, specUrl: "/redoc" };
 export const setupSwagger = (app: Express) => {
   app.use("/docs", swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
   app.get("/redoc", redoc(redocConfig));
-  console.log("📃 Swagger docs available at http://localhost:8000/docs");
+  debugLog("📃 Swagger docs available at http://localhost:8000/docs");
 };
 
 export default setupSwagger;

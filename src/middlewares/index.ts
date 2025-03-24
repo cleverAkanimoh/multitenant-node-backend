@@ -7,6 +7,7 @@ import { globalErrorResolver } from "./globalErrorResolver";
 // import passport from "../apps/authentication/controllers/socialControllers";
 // import session from "express-session";
 
+import { debugLog } from "../utils/debugLog";
 import { cacheMiddleware } from "./cachedMiddleware";
 
 export const configureMiddleware = (app: Express) => {
@@ -31,5 +32,5 @@ export const configureMiddleware = (app: Express) => {
   // app.use(passport.initialize());
   // app.use(passport.session());
 
-  console.log("Middlewares loaded successfully");
+  debugLog("Middlewares loaded successfully");
 };

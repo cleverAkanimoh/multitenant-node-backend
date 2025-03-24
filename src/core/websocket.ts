@@ -2,6 +2,7 @@ import { Server as HTTPServer } from "http";
 import { Socket, Server as SocketIOServer } from "socket.io";
 import { verifyJwtToken } from "../apps/authentication/services";
 import User from "../apps/users/models/user";
+import { debugLog } from "../utils/debugLog";
 
 const clients = new Map<string, Socket>();
 
@@ -18,7 +19,7 @@ export const setupWebSocketServer = (server: HTTPServer) => {
 
     try {
       const decoded = verifyJwtToken(token);
-      const userId = decoded.id;
+      const userId = decoded.userId;
 
       const user = await User.findByPk(userId);
 
@@ -35,16 +36,16 @@ export const setupWebSocketServer = (server: HTTPServer) => {
     const userId = (socket as any).userId;
     clients.set(userId, socket);
 
-    console.log(`User ${userId} connected`);
+    debugLog(`User ${userId} connected`);
 
     socket.on("send", (data) => {
-      console.log(`Message from ${userId}:`, data);
+      debugLog(`Message from ${userId}:`, data);
       io.emit("newMessage", { userId, ...data }); // Broadcast to all clients
     });
 
     socket.on("disconnect", () => {
       clients.delete(userId);
-      console.log(`User ${userId} disconnected`);
+      debugLog(`User ${userId} disconnected`);
     });
   });
 

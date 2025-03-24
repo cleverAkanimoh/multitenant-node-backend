@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import redisClient from "../core/redisClient";
+import { debugLog } from "../utils/debugLog";
 
 export const cacheMiddleware = async (
   req: Request,
@@ -15,13 +16,13 @@ export const cacheMiddleware = async (
   try {
     const cachedData = await redisClient.get(key);
     if (cachedData) {
-      console.log("Cache hit:", key);
+      debugLog("Cache hit:", key);
       return res.json(JSON.parse(cachedData));
     }
-    console.log("Cache missed:", key);
+    debugLog("Cache missed:", key);
     next();
   } catch (error) {
-    console.error("Redis Middleware Error:\n", error);
+    debugLog("Redis Middleware Error:\n", error);
     next();
   }
 };

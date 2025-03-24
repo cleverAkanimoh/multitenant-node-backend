@@ -8,6 +8,7 @@ import storageRoutes from "./apps/storage/routes";
 import { setupSwagger } from "./core/swagger.config";
 
 import path from "path";
+import { debugLog } from "./utils/debugLog";
 
 export const configAppRoutes = (app: Express, express: any) => {
   // static
@@ -19,5 +20,5 @@ export const configAppRoutes = (app: Express, express: any) => {
   app.use("/auth", authRoutes);
   app.use("/storage", storageRoutes);
 
-  console.log("All endpoints started at " + baseUrl);
+  debugLog("All endpoints started at " + baseUrl);
 };

@@ -1,4 +1,6 @@
 export interface TToken {
-  id: string;
-  tenantId?: string;
+  userId: string;
+  tenantId: string;
+  iat?: number;
+  exp?: number;
 }

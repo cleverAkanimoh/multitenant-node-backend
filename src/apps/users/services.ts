@@ -1,5 +1,8 @@
 import { withTransaction } from "../../utils/withTransaction";
-import { hashPassword } from "../authentication/services";
+import {
+  hashPassword,
+  sendAccountVerificationEmail,
+} from "../authentication/services";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
 export const findUserById = async (id: string, attributes?: string[]) => {
@@ -29,7 +32,7 @@ export const createUser = async (userData: UserCreationAttributes) => {
   const hashedPassword = await hashPassword(userData.password);
 
   return withTransaction(async (transaction) => {
-    return await User.create(
+    const user = await User.create(
       {
         ...userData,
         email: userData.email.toLowerCase(),
@@ -38,6 +41,10 @@ export const createUser = async (userData: UserCreationAttributes) => {
       },
       { transaction }
     );
+
+    await sendAccountVerificationEmail(user);
+
+    return user;
   });
 };
 
@@ -63,4 +70,23 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
     ...userData,
     userRole: Roles.SUPERADMIN,
   });
+};
+
+// Deactivate a user account
+export const deactivateUser = async (userId: string) => {
+  const user = await findUserById(userId);
+  if (!user) throw new Error("Account not found");
+
+  user.deletedAt = new Date();
+  await user.save();
+  return user;
+};
+
+// Delete a user account
+export const deleteUser = async (userId: string) => {
+  const user = await findUserById(userId);
+  if (!user) throw new Error("Account not found");
+
+  await user.destroy();
+  return user;
 };

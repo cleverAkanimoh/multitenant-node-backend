@@ -7,6 +7,7 @@ interface HandleRequestsParams<T> {
   res: Response;
   callback?: () => any;
   resData?: (d: T) => any;
+  statusCode?: number;
 }
 
 export async function handleRequests<T>({
@@ -15,6 +16,7 @@ export async function handleRequests<T>({
   res,
   callback,
   resData,
+  statusCode = 200,
 }: HandleRequestsParams<T>) {
   try {
     if (callback) {
@@ -22,10 +24,10 @@ export async function handleRequests<T>({
       return;
     }
     const data = await promise;
-    res.status(200).json(
+    res.status(statusCode).json(
       customResponse({
         message,
-        statusCode: 200,
+        statusCode,
         data: resData?.(data) || data,
       })
     );

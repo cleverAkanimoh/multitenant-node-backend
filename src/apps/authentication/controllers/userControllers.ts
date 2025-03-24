@@ -11,6 +11,8 @@ import {
   createAdmin,
   createStaff,
   createSuperAdmin,
+  deactivateUser,
+  deleteUser,
   findUserByEmail,
 } from "../../users/services";
 import { AuthRequest } from "../middlewares";
@@ -22,7 +24,7 @@ import {
   userSchema,
 } from "../schemas";
 import {
-  generateToken,
+  generateJwtToken,
   hashPassword,
   sendResetEmail,
   verifyJwtToken,
@@ -148,7 +150,7 @@ export const activateAccount = async (req: Request, res: Response) => {
 
       return await User.update(
         { isActive: true },
-        { where: { id: decoded.id } }
+        { where: { id: decoded.userId } }
       );
     })(),
     message: "Account activated successfully!",
@@ -188,10 +190,16 @@ export const login = async (req: Request, res: Response) => {
       const { email, password } = req.body;
       const user = await findUserByEmail(email);
       if (!user || !(await verifyPassword(password, user.password))) {
-        throw new Error("Invalid credentials");
+        return res
+          .status(400)
+          .json(
+            customResponse({ message: "Invalid credentials", statusCode: 400 })
+          );
       }
 
-      const token = generateToken(user.id, user.tenantId);
+      const token = generateJwtToken(user.id, user.tenantId, {
+        expiresIn: "21d",
+      });
       res.cookie(COOKIE_NAME, token, { httpOnly: true, signed: true });
 
       return { token, user: cleanUserData(user) };
@@ -311,12 +319,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
       const user = await findUserByEmail(email);
       if (!user) throw new Error("User not found");
 
-      const resetToken = generateToken(user.id, "1h");
-      await sendResetEmail(user, resetToken);
+      const resetToken = generateJwtToken(user.id, user.tenantId, {
+        expiresIn: "1h",
+      });
 
-      return "Password reset email sent";
+      await sendResetEmail(user, resetToken);
     })(),
-    message: null,
+    message: "Password reset email sent",
     res,
   });
 };
@@ -353,18 +362,37 @@ export const resetPassword = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { token, newPassword } = req.body;
-      const decoded = verifyJwtToken(token) as { id: string };
+      const decoded = verifyJwtToken(token);
       if (!decoded) throw new Error("Invalid or expired token");
 
       const hashedPassword = await hashPassword(newPassword);
       await User.update(
         { password: hashedPassword },
-        { where: { id: decoded.id } }
+        { where: { id: decoded.userId } }
       );
 
       return "Password reset successful";
     })(),
     message: null,
+    res,
+  });
+};
+
+export const deactivateUserAccount = async (req: Request, res: Response) => {
+  return handleRequests({
+    promise: (async () => await deactivateUser(req.params.id))(),
+    message: "Account deactivated successfully",
+    statusCode: 204,
+    res,
+  });
+};
+
+// Delete a user account
+export const deleteUserAccount = async (req: Request, res: Response) => {
+  return handleRequests({
+    promise: (async () => await deleteUser(req.params.id))(),
+    message: "Account deleted successfully",
+    statusCode: 204,
     res,
   });
 };

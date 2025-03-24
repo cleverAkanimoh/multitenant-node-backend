@@ -9,7 +9,18 @@ const router = Router();
 router.post("/register", userController.registerUser);
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
+
 router.get("/current-user", authenticate as any, userController.getCurrentUser);
+router.delete(
+  "/delete-user/:id",
+  authenticate as any,
+  userController.deleteUserAccount
+);
+router.post(
+  "/deactivate-user/:id",
+  authenticate as any,
+  userController.deactivateUserAccount
+);
 
 router.post("/verify-account", userController.activateAccount);
 router.post("/forgot-password", userController.forgotPassword);

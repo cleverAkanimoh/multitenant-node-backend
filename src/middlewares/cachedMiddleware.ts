@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import redisClient from "../core/redisClient";
 
 export const cacheMiddleware = async (
@@ -6,6 +6,10 @@ export const cacheMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  if (req.method !== "GET") {
+    return next();
+  }
+
   const key = req.originalUrl;
 
   try {

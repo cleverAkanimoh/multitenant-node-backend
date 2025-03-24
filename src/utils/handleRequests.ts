@@ -1,12 +1,21 @@
 import { Response } from "express";
 import { customResponse } from "./customResponse";
 
-export async function handleRequests<T>(
-  promise: Promise<T>,
-  message: string | null,
-  res: Response,
-  callback?: () => any
-) {
+interface HandleRequestsParams<T> {
+  promise: Promise<T>;
+  message: string | null;
+  res: Response;
+  callback?: () => any;
+  resData?: (d: T) => any;
+}
+
+export async function handleRequests<T>({
+  promise,
+  message,
+  res,
+  callback,
+  resData,
+}: HandleRequestsParams<T>) {
   try {
     if (callback) {
       callback?.();
@@ -17,7 +26,7 @@ export async function handleRequests<T>(
       customResponse({
         message,
         statusCode: 200,
-        data,
+        data: resData?.(data) || data,
       })
     );
   } catch (error) {
@@ -30,6 +39,11 @@ export async function handleRequests<T>(
   }
 }
 
+interface HandleErrorParams {
+  res: Response;
+  message: string;
+}
+
 export const handleValidationError = (res: Response, error: any) => {
   return res.status(400).json(
     customResponse({
@@ -40,10 +54,10 @@ export const handleValidationError = (res: Response, error: any) => {
   );
 };
 
-export const handleNotFound = (res: Response, message: string) => {
+export const handleNotFound = ({ res, message }: HandleErrorParams) => {
   return res.status(404).json(customResponse({ message, statusCode: 404 }));
 };
 
-export const handleUnauthorized = (res: Response, message: string) => {
+export const handleUnauthorized = ({ res, message }: HandleErrorParams) => {
   return res.status(401).json(customResponse({ message, statusCode: 401 }));
 };

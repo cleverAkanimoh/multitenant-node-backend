@@ -94,7 +94,6 @@ export const registerUser = async (req: Request, res: Response) => {
   if (error) return handleValidationError(res, error);
 
   const existingUser = await findUserByEmail(req.body.email.toLowerCase());
-
   if (existingUser) {
     return res.status(400).json(
       customResponse({
@@ -103,11 +102,24 @@ export const registerUser = async (req: Request, res: Response) => {
       })
     );
   }
-  console.log({ role: Roles.SUPERADMIN, userRole: req.body.userRole });
 
   const isSuperAdmin = req.body.userRole === Roles.SUPERADMIN;
   const isHr = req.body.userRole === Roles.ADMIN;
-  // const isStaff = req.body.userRole === Roles.STAFF;
+
+  if (isSuperAdmin) {
+    const superAdminHasCreatedAnAccount = await User.findOne({
+      where: { tenantId: req.body.tenantId },
+    });
+
+    if (superAdminHasCreatedAnAccount) {
+      return res.status(400).json(
+        customResponse({
+          message: "Company already exists",
+          statusCode: 400,
+        })
+      );
+    }
+  }
 
   const checkUserRole = isSuperAdmin
     ? createSuperAdmin(req.body)
@@ -115,12 +127,23 @@ export const registerUser = async (req: Request, res: Response) => {
     ? createAdmin(req.body)
     : createStaff(req.body);
 
-  return handleRequests(checkUserRole, "Account created successfully", res);
+  const checkUserType = isSuperAdmin
+    ? "Company"
+    : isHr
+    ? "Hr"
+    : "Staff";
+
+  return handleRequests({
+    promise: checkUserRole,
+    message: checkUserType + " created successfully",
+    res,
+    resData: (data) => cleanUserData(data),
+  });
 };
 
 export const activateAccount = async (req: Request, res: Response) => {
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       const { token } = req.query;
       if (!token) throw new Error("Invalid activation token");
 
@@ -130,9 +153,9 @@ export const activateAccount = async (req: Request, res: Response) => {
       await User.update({ isActive: true }, { where: { id: decoded.id } });
       return "Account activated successfully!";
     })(),
-    null,
-    res
-  );
+    message: null,
+    res,
+  });
 };
 
 /**
@@ -158,13 +181,12 @@ export const activateAccount = async (req: Request, res: Response) => {
  *       401:
  *         description: Invalid credentials
  */
-
 export const login = async (req: Request, res: Response) => {
   const { error } = loginSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       const { email, password } = req.body;
       const user = await findUserByEmail(email);
       if (!user || !(await verifyPassword(password, user.password))) {
@@ -172,14 +194,13 @@ export const login = async (req: Request, res: Response) => {
       }
 
       const token = generateToken(user.id, user.tenantId);
-
       res.cookie(COOKIE_NAME, token, { httpOnly: true, signed: true });
 
       return { token, user: cleanUserData(user) };
     })(),
-    "Login was successful",
-    res
-  );
+    message: "Login was successful",
+    res,
+  });
 };
 
 /**
@@ -211,8 +232,8 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
   const { error } = changePasswordSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       if (!req.user) throw new Error("Unauthorized");
 
       const user = req.user;
@@ -228,9 +249,9 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
       return "Password changed successfully";
     })(),
-    null,
-    res
-  );
+    message: null,
+    res,
+  });
 };
 
 /**
@@ -249,16 +270,16 @@ export const logout = (req: Request, res: Response) => {
 };
 
 export const getCurrentUser = async (req: Request, res: Response) => {
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       const user = req.user;
       if (!user) throw new Error("User not found");
 
       return user;
     })(),
-    "User retrieved successfully",
-    res
-  );
+    message: "User retrieved successfully",
+    res,
+  });
 };
 
 /**
@@ -286,8 +307,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
   const { error } = forgotPasswordSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       const { email } = req.body;
       const user = await findUserByEmail(email);
       if (!user) throw new Error("User not found");
@@ -297,9 +318,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
       return "Password reset email sent";
     })(),
-    null,
-    res
-  );
+    message: null,
+    res,
+  });
 };
 
 /**
@@ -331,8 +352,8 @@ export const resetPassword = async (req: Request, res: Response) => {
   const { error } = resetPasswordSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  return handleRequests(
-    (async () => {
+  return handleRequests({
+    promise: (async () => {
       const { token, newPassword } = req.body;
       const decoded = verifyJwtToken(token) as { id: string };
       if (!decoded) throw new Error("Invalid or expired token");
@@ -345,7 +366,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
       return "Password reset successful";
     })(),
-    null,
-    res
-  );
+    message: null,
+    res,
+  });
 };

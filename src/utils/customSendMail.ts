@@ -5,9 +5,8 @@ import { debugLog } from "./debugLog";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  // host: "smtp-relay.brevo.com",
-  
-  port: 587,
+  host: "smtp.ipage.com",
+  port: 587, //465
   secure: false,
   auth: {
     user: process.env.EMAIL_USER as string,

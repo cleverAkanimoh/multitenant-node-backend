@@ -6,7 +6,10 @@ export const getAllUsers = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  await handleRequests(User.findAll(), "Users retrieved successfully", res);
+  await handleRequests({
+    promise: User.findAll(),
+    message: "Users retrieved successfully",
+
+    res,
+  });
 };
-
-

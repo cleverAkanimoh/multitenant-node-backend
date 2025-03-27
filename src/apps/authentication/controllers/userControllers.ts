@@ -133,7 +133,9 @@ export const registerUser = async (req: Request, res: Response) => {
 
   return handleRequests({
     promise: checkUserRole,
-    message: checkUserType + " created successfully",
+    message:
+      checkUserType +
+      " created successfully, check your email to activate account",
     res,
     resData: (data) => cleanUserData(data),
   });

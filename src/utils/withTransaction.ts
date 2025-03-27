@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import sequelize from "../core/orm";
+import { debugLog } from "./debugLog";
 
 /**
  * Executes a function within a Sequelize transaction.
@@ -18,6 +19,7 @@ export const withTransaction = async <T>(
     await transaction.commit();
     return result;
   } catch (error) {
+    debugLog("Rollback changes due to error ", error);
     await transaction.rollback();
     throw error;
   }

@@ -28,6 +28,7 @@ export const cleanUserData = (user: User) => {
 
 export const createUser = async (userData: UserCreationAttributes) => {
   if (!userData.email) throw new Error("Email is required");
+  if (!userData.password) throw new Error("Password is required");
 
   const hashedPassword = await hashPassword(userData.password);
 

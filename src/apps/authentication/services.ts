@@ -24,10 +24,10 @@ export const verifyJwtToken = (token: string) => {
 
 export const sendAccountVerificationEmail = async (user: User) => {
   const activationToken = generateJwtToken(user.id || "", user.tenantId, {
-    expiresIn: "12h",
+    expiresIn: "1h",
   });
 
-  const activationLink = `${frontendUrl}/auth/activate?token=${activationToken}`;
+  const activationLink = `${frontendUrl}/auth/activate-account?token=${activationToken}`;
 
   const html = generateEmailTemplate({
     title: "Welcome to E-Metrics Suite!",

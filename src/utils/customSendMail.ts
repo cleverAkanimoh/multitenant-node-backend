@@ -6,8 +6,8 @@ dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.ipage.com",
-  port: 587, //465
-  secure: false,
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER as string,
     pass: process.env.EMAIL_PASS as string,

@@ -4,30 +4,10 @@ import speakeasy from "speakeasy";
 import { customResponse } from "../../../utils/customResponse";
 import { AuthRequest } from "../middlewares";
 
-// Helper function to get the authenticated user
-const getAuthenticatedUser = async (req: AuthRequest, res: Response) => {
-  if (!req.user) {
-    res
-      .status(401)
-      .json(customResponse({ message: "Unauthorized", statusCode: 401 }));
-    return null;
-  }
-
-  const user = req.user;
-  if (!user) {
-    res
-      .status(404)
-      .json(customResponse({ message: "User not found", statusCode: 404 }));
-    return null;
-  }
-
-  return user;
-};
-
 // Enable MFA
 export const enableMfa = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await getAuthenticatedUser(req, res);
+    const user = req.user;
     if (!user) return;
 
     const secret = speakeasy.generateSecret({ length: 20 });
@@ -60,7 +40,7 @@ export const enableMfa = async (req: AuthRequest, res: Response) => {
 export const verifyMfa = async (req: AuthRequest, res: Response) => {
   try {
     const { otp } = req.body;
-    const user = await getAuthenticatedUser(req, res);
+    const user = req.user;
     if (!user) return;
 
     if (!user.mfaSecret) {

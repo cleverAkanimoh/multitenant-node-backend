@@ -23,6 +23,7 @@ export const authenticate = async (
     if (!user) throw new Error("No user found in request");
 
     req.user = user;
+    req.company = decoded.tenantId;
     next();
   } catch (error) {
     debugLog(error);

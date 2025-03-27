@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../core/orm";
-import User, { Roles } from "./user";
+import User, { Roles } from "../../users/models/user";
 
 export enum StructureLevel {
   CORPORATE = "corporate",
@@ -81,13 +81,8 @@ Company.init(
       allowNull: false,
     },
     structureLevel: {
-      type: DataTypes.ENUM(
-        StructureLevel.CORPORATE,
-        StructureLevel.DIVISIONAL,
-        StructureLevel.GROUP,
-        StructureLevel.DEPARTMENT,
-        StructureLevel.UNIT
-      ),
+      type: DataTypes.ENUM,
+      values: Object.values(StructureLevel),
       allowNull: false,
     },
     ownerId: {
@@ -117,14 +112,16 @@ User.belongsTo(Company, {
   as: "company",
 });
 
-// Auto-assign owner (oldest superadmin)
+// Auto-assign owner (oldest superadmin) if ownerId is null
 Company.beforeCreate(async (company) => {
-  const oldestSuperAdmin = await User.findOne({
-    where: { userRole: Roles.SUPERADMIN },
-    order: [["createdAt", "ASC"]],
-  });
-  if (oldestSuperAdmin) {
-    company.ownerId = oldestSuperAdmin.id;
+  if (!company.ownerId) {
+    const oldestSuperAdmin = await User.findOne({
+      where: { userRole: Roles.SUPERADMIN },
+      order: [["createdAt", "ASC"]],
+    });
+    if (oldestSuperAdmin) {
+      company.ownerId = oldestSuperAdmin.id;
+    }
   }
 });
 

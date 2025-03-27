@@ -18,10 +18,14 @@ export const userSchema = Joi.object({
     "string.email": "Invalid email format",
     "any.required": "Email is required",
   }),
-
-  tenantId: Joi.string().required().messages({
-    "any.required": "Tenant ID is required",
-  }),
+  phoneNumber: Joi.string()
+    .pattern(/^\+?[0-9]\d{1,14}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Phone number must be a valid format.",
+      "any.required": "Phone number is required",
+    }),
+  tenantId: Joi.string().optional(),
   password: Joi.string()
     .min(minPasswordLength)
     .pattern(new RegExp(passwordRegex))

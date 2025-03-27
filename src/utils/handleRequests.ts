@@ -24,7 +24,7 @@ export async function handleRequests<T>({
       return;
     }
     const data = await promise;
-    res.status(statusCode).json(
+    return res.status(statusCode).json(
       customResponse({
         message,
         statusCode,
@@ -32,7 +32,7 @@ export async function handleRequests<T>({
       })
     );
   } catch (error) {
-    res.status(500).json(
+    return res.status(500).json(
       customResponse({
         message: error instanceof Error ? error.message : "An error occurred",
         statusCode: 500,

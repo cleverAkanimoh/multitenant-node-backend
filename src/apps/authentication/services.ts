@@ -22,7 +22,7 @@ export const verifyJwtToken = (token: string) => {
   return jwt.verify(token, JWT_SECRET) as TToken;
 };
 
-export const sendAccountVerificationEmail = async (user: User) => {
+export const sendSuperAdminActivationEmail = async (user: User) => {
   const activationToken = generateJwtToken(user.id || "", user.tenantId, {
     expiresIn: "1h",
   });

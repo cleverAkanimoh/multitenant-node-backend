@@ -108,21 +108,6 @@ export const registerUser = async (req: Request, res: Response) => {
   const isSuperAdmin = req.body.userRole === Roles.SUPERADMIN;
   const isHr = req.body.userRole === Roles.ADMIN;
 
-  if (isSuperAdmin) {
-    const superAdminHasCreatedAnAccount = await User.findOne({
-      where: { tenantId: req.body.tenantId },
-    });
-
-    if (superAdminHasCreatedAnAccount) {
-      return res.status(400).json(
-        customResponse({
-          message: "Company already exists",
-          statusCode: 400,
-        })
-      );
-    }
-  }
-
   const checkUserRole = isSuperAdmin
     ? createSuperAdmin(req.body)
     : isHr
@@ -137,7 +122,7 @@ export const registerUser = async (req: Request, res: Response) => {
       checkUserType +
       " created successfully, check your email to activate account",
     res,
-    resData: (data) => cleanUserData(data),
+    // resData: (data) => cleanUserData(data),
   });
 };
 
@@ -283,10 +268,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       const user = req.user;
       if (!user) throw new Error("User not found");
 
-      return user;
+      return cleanUserData(user as User);
     })(),
-    message: "User retrieved successfully",
+    message: null,
     res,
+    // resData: (user: any) => user,
   });
 };
 

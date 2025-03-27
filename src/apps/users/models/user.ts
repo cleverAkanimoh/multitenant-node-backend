@@ -9,8 +9,9 @@ export enum Roles {
 
 export interface UserAttributes {
   id: string;
-  tenantId: string;
+  tenantId?: string;
   name: string;
+  phoneNumber: string;
   email: string;
   password: string;
   mfaSecret?: string;
@@ -22,7 +23,7 @@ export interface UserAttributes {
 }
 
 export interface UserCreationAttributes
-  extends Optional<UserAttributes, "id"> {}
+  extends Optional<UserAttributes, "id" | "tenantId"> {}
 
 class User
   extends Model<UserAttributes, UserCreationAttributes>
@@ -32,9 +33,10 @@ class User
   public tenantId!: string;
   public name!: string;
   public email!: string;
+  public phoneNumber!: string;
+  public userRole!: Roles;
   public password!: string;
   public mfaSecret?: string;
-  public userRole?: Roles;
   public isStaff?: boolean;
   public isActive?: boolean;
   public isMfaEnabled?: boolean;
@@ -60,6 +62,10 @@ User.init(
       allowNull: false,
       unique: true,
     },
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -71,7 +77,7 @@ User.init(
     userRole: {
       type: DataTypes.ENUM,
       values: Object.values(Roles),
-      defaultValue: Roles.STAFF,
+      allowNull: false,
     },
     isStaff: {
       type: DataTypes.BOOLEAN,

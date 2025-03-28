@@ -28,7 +28,7 @@ export const authenticate = async (
   } catch (error) {
     debugLog(error);
 
-    res.status(401).json(
+    return res.status(401).json(
       customResponse({
         message: (error as Error)?.message || "",
         data: error,

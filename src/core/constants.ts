@@ -1,1 +1,1 @@
-export const COOKIE_NAME = "x-metrics-auth-cookies";
+export const COOKIE_NAME = "x-emetrics-auth-cookies";

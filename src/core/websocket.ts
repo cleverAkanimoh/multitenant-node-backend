@@ -9,7 +9,11 @@ const clients = new Map<string, Socket>();
 export const setupWebSocketServer = (server: HTTPServer) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: ["http://localhost:3000", "https://emetrics.netlify.app"],
+      origin: [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://emetrics.netlify.app",
+      ],
     },
   });
 

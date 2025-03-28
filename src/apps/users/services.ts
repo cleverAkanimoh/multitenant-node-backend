@@ -1,10 +1,7 @@
-import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
-import {
-  hashPassword,
-  sendSuperAdminActivationEmail,
-} from "../authentication/services";
+import { hashPassword, sendActivationEmail } from "../authentication/services";
+import Company from "../company/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
 export const findUserById = async (id: string, attributes?: string[]) => {
@@ -20,7 +17,8 @@ export const cleanUserData = (user: User) => {
   const isSuperAdmin = user.userRole === Roles.SUPERADMIN;
   const isHr = user.userRole === Roles.ADMIN;
   const isStaff = user.userRole === Roles.STAFF;
-  return {
+
+  const cleanData = {
     id: user.id,
     name: user.name,
     firstName,
@@ -32,7 +30,10 @@ export const cleanUserData = (user: User) => {
     isSuperAdmin,
     isHr,
     isStaff,
+    hasCompletedCompanyProfile: user.isNewRecord,
+    isNewUser: user.isNewRecord,
   };
+  return cleanData;
 };
 
 export const createUser = async (userData: UserCreationAttributes) => {
@@ -51,8 +52,6 @@ export const createUser = async (userData: UserCreationAttributes) => {
       },
       { transaction }
     );
-
-    await sendSuperAdminActivationEmail(user);
 
     return user;
   });
@@ -76,25 +75,46 @@ export const createAdmin = async (userData: UserCreationAttributes) => {
 
 // Create a superuser
 export const createSuperAdmin = async (userData: UserCreationAttributes) => {
-  const tenantIdIfNone = userData.tenantId || (await generateUniqueTenantId());
+  return await withTransaction(async (transaction) => {
+    const tenantIdIfNone =
+      userData.tenantId || (await generateUniqueTenantId());
 
-  debugLog({ tenantId: userData.tenantId, tenantIdIfNone });
+    const isSuperAdmin = userData.userRole === Roles.SUPERADMIN;
 
-  const isSuperAdmin = userData.userRole === Roles.SUPERADMIN;
+    if (isSuperAdmin && userData.tenantId) {
+      const superAdminHasCreatedAnAccount = await User.findOne({
+        where: { tenantId: userData.tenantId },
+        transaction,
+      });
 
-  if (isSuperAdmin && userData.tenantId) {
-    const superAdminHasCreatedAnAccount = await User.findOne({
-      where: { tenantId: userData.tenantId },
-    });
-
-    if (superAdminHasCreatedAnAccount) {
-      throw new Error("Company already exists");
+      if (superAdminHasCreatedAnAccount) {
+        throw new Error("Company already exists");
+      }
     }
-  }
-  return createUser({
-    ...userData,
-    tenantId: tenantIdIfNone,
-    userRole: Roles.SUPERADMIN,
+
+    const company = await Company.create(
+      {
+        id: tenantIdIfNone,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+      },
+      { transaction }
+    );
+
+    const newUser = await User.create(
+      {
+        ...userData,
+        tenantId: tenantIdIfNone,
+        userRole: Roles.SUPERADMIN,
+      },
+      { transaction }
+    );
+
+    company.update({ ownerId: newUser.id }, { transaction });
+
+    await sendActivationEmail(newUser);
+
+    return newUser;
   });
 };
 

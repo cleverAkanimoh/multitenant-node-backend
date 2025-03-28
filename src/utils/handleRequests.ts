@@ -1,5 +1,6 @@
 import { Response } from "express";
 import { customResponse } from "./customResponse";
+import { debugLog } from "./debugLog";
 
 interface HandleRequestsParams<T> {
   promise: Promise<T>;
@@ -19,25 +20,30 @@ export async function handleRequests<T>({
   statusCode = 200,
 }: HandleRequestsParams<T>) {
   try {
-    if (callback) {
-      callback?.();
-      return;
-    }
+    if (callback) return callback?.();
+
     const data = await promise;
-    return res.status(statusCode).json(
-      customResponse({
-        message,
-        statusCode,
-        data: resData?.(data) || data,
-      })
-    );
+
+    if (!res.headersSent) {
+      return res.status(statusCode).json(
+        customResponse({
+          message,
+          statusCode,
+          data: resData?.(data) || data,
+        })
+      );
+    }
   } catch (error) {
-    return res.status(500).json(
-      customResponse({
-        message: error instanceof Error ? error.message : "An error occurred",
-        statusCode: 500,
-      })
-    );
+    debugLog("Error sending request ", error);
+
+    if (!res.headersSent) {
+      return res.status(500).json(
+        customResponse({
+          message: error instanceof Error ? error.message : "An error occurred",
+          statusCode: 500,
+        })
+      );
+    }
   }
 }
 

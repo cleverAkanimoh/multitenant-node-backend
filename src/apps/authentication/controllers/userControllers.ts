@@ -26,6 +26,7 @@ import {
 import {
   generateJwtToken,
   hashPassword,
+  sendActivationEmail,
   sendResetEmail,
   verifyJwtToken,
   verifyPassword,
@@ -122,7 +123,7 @@ export const registerUser = async (req: Request, res: Response) => {
       checkUserType +
       " created successfully, check your email to activate account",
     res,
-    // resData: (data) => cleanUserData(data),
+    resData: (_) => null,
   });
 };
 
@@ -176,6 +177,7 @@ export const login = async (req: Request, res: Response) => {
     promise: (async () => {
       const { email, password } = req.body;
       const user = await findUserByEmail(email);
+
       if (!user || !(await verifyPassword(password, user.password))) {
         return res
           .status(400)
@@ -184,6 +186,15 @@ export const login = async (req: Request, res: Response) => {
           );
       }
 
+      if (!user.isActive) {
+        await sendActivationEmail(user, false);
+        return res.status(400).json(
+          customResponse({
+            message: "Please check your mail to activate your account",
+            statusCode: 400,
+          })
+        );
+      }
       const token = generateJwtToken(user.id, user.tenantId, {
         expiresIn: "21d",
       });
@@ -268,11 +279,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       const user = req.user;
       if (!user) throw new Error("User not found");
 
-      return cleanUserData(user as User);
+      return user;
     })(),
     message: null,
     res,
-    // resData: (user: any) => user,
+    resData: (user) => cleanUserData(user as User),
   });
 };
 

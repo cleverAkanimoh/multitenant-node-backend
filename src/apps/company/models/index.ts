@@ -12,14 +12,14 @@ export enum StructureLevel {
 
 export interface CompanyAttributes {
   id: string;
-  name: string;
+  name?: string;
   address?: string;
   phoneNumber?: string;
   email?: string;
-  timezones: string[];
-  workDays: string[];
-  workTimeRange: { start: string; end: string };
-  structureLevel: StructureLevel;
+  timezones?: string[];
+  workDays?: string[];
+  workTimeRange?: { start: string; end: string };
+  structureLevel?: StructureLevel;
   ownerId?: string;
 }
 
@@ -31,14 +31,14 @@ class Company
   implements CompanyAttributes
 {
   public id!: string;
-  public name!: string;
+  public name?: string;
   public address?: string;
   public phoneNumber?: string;
   public email?: string;
-  public timezones!: string[];
-  public workDays!: string[];
-  public workTimeRange!: { start: string; end: string };
-  public structureLevel!: StructureLevel;
+  public timezones?: string[];
+  public workDays?: string[];
+  public workTimeRange?: { start: string; end: string };
+  public structureLevel?: StructureLevel;
   public ownerId?: string;
 
   public readonly createdAt!: Date;
@@ -48,13 +48,12 @@ class Company
 Company.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.STRING,
       primaryKey: true,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     address: {
       type: DataTypes.STRING,
@@ -70,20 +69,20 @@ Company.init(
     },
     timezones: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
+      allowNull: true,
     },
     workDays: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
+      allowNull: true,
     },
     workTimeRange: {
       type: DataTypes.JSONB,
-      allowNull: false,
+      allowNull: true,
     },
     structureLevel: {
       type: DataTypes.ENUM,
       values: Object.values(StructureLevel),
-      allowNull: false,
+      allowNull: true,
     },
     ownerId: {
       type: DataTypes.UUID,
@@ -102,17 +101,22 @@ Company.init(
   }
 );
 
-// Define associations
 Company.hasMany(User, {
-  foreignKey: "tenantId",
+  foreignKey: {
+    name: "tenantId",
+    allowNull: false,
+  },
   as: "users",
+  onDelete: "CASCADE",
 });
 User.belongsTo(Company, {
-  foreignKey: "tenantId",
+  foreignKey: {
+    name: "tenantId",
+    allowNull: false,
+  },
   as: "company",
 });
 
-// Auto-assign owner (oldest superadmin) if ownerId is null
 Company.beforeCreate(async (company) => {
   if (!company.ownerId) {
     const oldestSuperAdmin = await User.findOne({

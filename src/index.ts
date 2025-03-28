@@ -39,7 +39,7 @@ const PORT = process.env.PORT || 8000;
 
     await sequelize.sync({
       alter: true,
-      force: process.env.NODE_ENV === "development",
+      force: true, // process.env.NODE_ENV === "development"
     });
     debugLog("✅ All models synchronized.");
 

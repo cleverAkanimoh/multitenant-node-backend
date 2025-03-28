@@ -176,7 +176,8 @@ export const login = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email, password } = req.body;
-      const user = await findUserByEmail(email);
+      const user = await findUserByEmail(email.toLowerCase());
+      console.log({ user, email, password });
 
       if (!user || !(await verifyPassword(password, user.password))) {
         return res
@@ -185,6 +186,10 @@ export const login = async (req: Request, res: Response) => {
             customResponse({ message: "Invalid credentials", statusCode: 400 })
           );
       }
+
+      console.log({
+        isPassMatch: await verifyPassword(password, user.password),
+      });
 
       if (!user.isActive) {
         await sendActivationEmail(user, false);

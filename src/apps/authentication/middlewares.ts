@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -30,7 +30,7 @@ export const authenticate = async (
 
     return res.status(401).json(
       customResponse({
-        message: (error as Error)?.message || "",
+        message: (error as Error)?.message || "Authentication failed",
         data: error,
         statusCode: 401,
       })

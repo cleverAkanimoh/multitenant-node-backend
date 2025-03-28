@@ -21,6 +21,10 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
 
 export default sequelize;
 
+export const createTenantSchema = async (tenantId: string) => {
+  await sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${tenantId}";`);
+};
+
 export const getTenantModel = <T>(model: any, tenantSchema: string): T => {
   return model.schema(tenantSchema);
 };

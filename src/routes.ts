@@ -1,12 +1,9 @@
 import { Express } from "express";
 import { baseUrl } from "./core/configs";
 
-
 import authRoutes from "./apps/authentication/routes";
-import storageRoutes from "./apps/storage/routes";
 import companyRoutes from "./apps/company/routes";
-
-
+import storageRoutes from "./apps/storage/routes";
 import { setupSwagger } from "./core/swagger.config";
 
 import path from "path";

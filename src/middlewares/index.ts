@@ -21,6 +21,8 @@ export const configureMiddleware = (app: Express) => {
 
   app.use(cookieParser(process.env.SESSION_SECRET));
 
+  // app.use(tenantMiddleware);
+
   // app.use(
   //   session({
   //     secret: process.env.SESSION_SECRET as string,

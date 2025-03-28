@@ -1,3 +1,4 @@
+import { createTenantSchema } from "../../core/orm";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
 import { hashPassword, sendActivationEmail } from "../authentication/services";
@@ -9,6 +10,8 @@ export const findUserById = async (id: string, attributes?: string[]) => {
 };
 
 export const findUserByEmail = async (email: string) => {
+  console.log({ email });
+
   return User.findOne({ where: { email } });
 };
 
@@ -73,25 +76,23 @@ export const createAdmin = async (userData: UserCreationAttributes) => {
   });
 };
 
-// Create a superuser
 export const createSuperAdmin = async (userData: UserCreationAttributes) => {
-  return await withTransaction(async (transaction) => {
-    const tenantIdIfNone =
-      userData.tenantId || (await generateUniqueTenantId());
+  const tenantIdIfNone = userData.tenantId || (await generateUniqueTenantId());
+  const isSuperAdmin = userData.userRole === Roles.SUPERADMIN;
 
-    const isSuperAdmin = userData.userRole === Roles.SUPERADMIN;
+  if (isSuperAdmin && userData.tenantId) {
+    const superAdminExists = await User.findOne({
+      where: { tenantId: userData.tenantId },
+    });
 
-    if (isSuperAdmin && userData.tenantId) {
-      const superAdminHasCreatedAnAccount = await User.findOne({
-        where: { tenantId: userData.tenantId },
-        transaction,
-      });
-
-      if (superAdminHasCreatedAnAccount) {
-        throw new Error("Company already exists");
-      }
+    if (superAdminExists) {
+      throw new Error("Company already exists");
     }
+  }
 
+  await createTenantSchema(tenantIdIfNone);
+
+  return await withTransaction(async (transaction) => {
     const company = await Company.create(
       {
         id: tenantIdIfNone,
@@ -106,11 +107,15 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         ...userData,
         tenantId: tenantIdIfNone,
         userRole: Roles.SUPERADMIN,
+        isActive: true,
+        isStaff: true,
       },
       { transaction }
     );
 
-    company.update({ ownerId: newUser.id }, { transaction });
+    // 🔹 Update company ownerId safely
+    company.ownerId = newUser.id;
+    await company.save({ transaction });
 
     await sendActivationEmail(newUser);
 

@@ -1,8 +1,17 @@
-import { createTenantSchema } from "../../core/orm";
+import {
+  createTenantSchema,
+  deleteTenantSchema,
+  getTenantModel,
+} from "../../core/multitenancy";
+import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
-import { hashPassword, sendActivationEmail } from "../authentication/services";
+import {
+  hashPassword,
+  sendAccountVerificationEmail,
+} from "../authentication/services";
 import Company from "../company/models";
+import GlobalUser from "../shared/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
 export const findUserById = async (id: string, attributes?: string[]) => {
@@ -10,12 +19,14 @@ export const findUserById = async (id: string, attributes?: string[]) => {
 };
 
 export const findUserByEmail = async (email: string) => {
-  console.log({ email });
-
   return User.findOne({ where: { email } });
 };
 
-export const cleanUserData = (user: User) => {
+export const cleanUserData = async (gUser: GlobalUser) => {
+  const TenantUser = getTenantModel(User, gUser.tenantId);
+
+  const user = await TenantUser.findByPk(gUser.id);
+
   const [firstName, lastName] = user.name.split(" ");
   const isSuperAdmin = user.userRole === Roles.SUPERADMIN;
   const isHr = user.userRole === Roles.ADMIN;
@@ -80,6 +91,8 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   const tenantIdIfNone = userData.tenantId || (await generateUniqueTenantId());
   const isSuperAdmin = userData.userRole === Roles.SUPERADMIN;
 
+  const hashedPassword = await hashPassword(userData.password);
+
   if (isSuperAdmin && userData.tenantId) {
     const superAdminExists = await User.findOne({
       where: { tenantId: userData.tenantId },
@@ -92,35 +105,72 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
   await createTenantSchema(tenantIdIfNone);
 
-  return await withTransaction(async (transaction) => {
-    const company = await Company.create(
-      {
-        id: tenantIdIfNone,
-        email: userData.email,
-        phoneNumber: userData.phoneNumber,
-      },
-      { transaction }
-    );
+  const TenantCompany = getTenantModel(Company, tenantIdIfNone);
+  const TenantUser = getTenantModel(User, tenantIdIfNone);
 
-    const newUser = await User.create(
-      {
-        ...userData,
-        tenantId: tenantIdIfNone,
-        userRole: Roles.SUPERADMIN,
-        isActive: true,
-        isStaff: true,
-      },
-      { transaction }
-    );
-
-    // 🔹 Update company ownerId safely
-    company.ownerId = newUser.id;
-    await company.save({ transaction });
-
-    await sendActivationEmail(newUser);
-
-    return newUser;
+  TenantCompany.hasMany(TenantUser, {
+    foreignKey: { name: "tenantId", allowNull: false },
+    as: tenantIdIfNone + "-users",
+    onDelete: "CASCADE",
   });
+  TenantUser.belongsTo(TenantCompany, {
+    foreignKey: { name: "tenantId", allowNull: false },
+    as: tenantIdIfNone + "-company",
+  });
+
+  await TenantCompany.sync({ alter: true });
+  await TenantUser.sync({ alter: true });
+
+  try {
+    return await withTransaction(async (transaction) => {
+      const company = (await TenantCompany.create(
+        {
+          id: tenantIdIfNone,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber,
+        },
+        { transaction }
+      )) as Company;
+
+      // Then create the superadmin user
+      const newUser = (await TenantUser.create(
+        {
+          ...userData,
+          email: userData.email.toLowerCase(),
+          password: hashedPassword,
+          tenantId: tenantIdIfNone,
+          userRole: Roles.SUPERADMIN,
+          isActive: false,
+          isStaff: true,
+        },
+        { transaction }
+      )) as User;
+
+      // Update the company record with the new user's ID as ownerId
+      company.ownerId = newUser.id;
+      await company.save({ transaction });
+
+      const gUser = await GlobalUser.create(
+        {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.email,
+          password: hashedPassword,
+          tenantId: tenantIdIfNone,
+          userRole: newUser.userRole,
+        },
+        { transaction }
+      );
+
+      await sendAccountVerificationEmail(gUser);
+
+      return newUser;
+    });
+  } catch (error) {
+    debugLog("Deleting tenant schema");
+    await deleteTenantSchema(tenantIdIfNone);
+    throw error;
+  }
 };
 
 // Deactivate a user account

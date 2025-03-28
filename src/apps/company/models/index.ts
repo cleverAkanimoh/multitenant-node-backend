@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../core/orm";
-import User, { Roles } from "../../users/models/user";
+import User from "../../users/models/user";
 
 export enum StructureLevel {
   CORPORATE = "corporate",
@@ -87,10 +87,6 @@ Company.init(
     ownerId: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: {
-        model: User,
-        key: "id",
-      },
     },
   },
   {
@@ -109,24 +105,10 @@ Company.hasMany(User, {
   as: "users",
   onDelete: "CASCADE",
 });
-User.belongsTo(Company, {
-  foreignKey: {
-    name: "tenantId",
-    allowNull: false,
-  },
-  as: "company",
-});
 
-Company.beforeCreate(async (company) => {
-  if (!company.ownerId) {
-    const oldestSuperAdmin = await User.findOne({
-      where: { userRole: Roles.SUPERADMIN },
-      order: [["createdAt", "ASC"]],
-    });
-    if (oldestSuperAdmin) {
-      company.ownerId = oldestSuperAdmin.id;
-    }
-  }
+User.belongsTo(Company, {
+  foreignKey: { name: "tenantId", allowNull: false },
+  as: "company",
 });
 
 export default Company;

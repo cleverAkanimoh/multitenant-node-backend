@@ -71,13 +71,11 @@ export const changePasswordSchema = Joi.object({
 
 export const forgotPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
-  type: Joi.string().valid("user", "company").required(),
 });
 
 export const resetPasswordSchema = Joi.object({
   token: Joi.string().required(),
   newPassword: Joi.string().min(6).required(),
-  type: Joi.string().valid("user", "company").required(),
 });
 
 export const resendActivationEmailSchema = Joi.object({

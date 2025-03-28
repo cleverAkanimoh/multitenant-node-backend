@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
+import Company from "../apps/company/models";
 import User from "../apps/users/models/user";
-import { getTenantModel } from "../core/orm";
+import { getTenantModel } from "../core/multitenancy";
 import { customResponse } from "../utils/customResponse";
 
 declare global {
   namespace Express {
     interface Request {
-      tenantUserModel?: any;
+      tenantUserModel?: User;
+      tenantCompanyModel?: Company;
     }
   }
 }
@@ -25,6 +27,7 @@ const tenantMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     req.tenantUserModel = getTenantModel(User, tenantId);
+    req.tenantCompanyModel = getTenantModel(Company, tenantId);
     next();
   } catch (error) {
     res.status(500).json({ message: "Failed to set tenant schema", error });

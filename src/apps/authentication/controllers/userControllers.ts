@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { COOKIE_NAME } from "../../../core/constants";
+import { getTenantModel } from "../../../core/multitenancy";
 import { customResponse } from "../../../utils/customResponse";
 import {
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
+import GlobalUser from "../../shared/models";
+import { findGlobalUserByEmail } from "../../shared/services";
 import User, { Roles } from "../../users/models/user";
 import {
   cleanUserData,
@@ -13,7 +16,6 @@ import {
   createSuperAdmin,
   deactivateUser,
   deleteUser,
-  findUserByEmail,
 } from "../../users/services";
 import { AuthRequest } from "../middlewares";
 import {
@@ -26,7 +28,7 @@ import {
 import {
   generateJwtToken,
   hashPassword,
-  sendActivationEmail,
+  sendAccountVerificationEmail,
   sendResetEmail,
   verifyJwtToken,
   verifyPassword,
@@ -95,7 +97,9 @@ export const registerUser = async (req: Request, res: Response) => {
   const { error } = userSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  const existingUser = await findUserByEmail(req.body.email.toLowerCase());
+  const existingUser = await findGlobalUserByEmail(
+    req.body.email.toLowerCase()
+  );
 
   if (existingUser) {
     return res.status(400).json(
@@ -131,12 +135,36 @@ export const activateAccount = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { token } = req.query;
-      if (!token) throw new Error("Invalid activation token");
+      if (!token)
+        return res.status(400).json(
+          customResponse({
+            message: "No activation token provided",
+            statusCode: 400,
+          })
+        );
 
       const decoded = verifyJwtToken(token as string);
-      if (!decoded) throw new Error("Invalid or expired token");
+      if (!decoded)
+        return res.status(400).json(
+          customResponse({
+            message: "Invalid or expired token",
+            statusCode: 400,
+          })
+        );
 
-      return await User.update(
+      const TenantUser = getTenantModel(User, decoded.tenantId);
+
+      const user = await TenantUser.findByPk(decoded.userId);
+
+      if (user.isActive)
+        return res.status(400).json(
+          customResponse({
+            message: "Account is already active",
+            statusCode: 400,
+          })
+        );
+
+      return await TenantUser.update(
         { isActive: true },
         { where: { id: decoded.userId } }
       );
@@ -176,10 +204,12 @@ export const login = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email, password } = req.body;
-      const user = await findUserByEmail(email.toLowerCase());
-      console.log({ user, email, password });
+      const globalUser = await findGlobalUserByEmail(email.toLowerCase());
 
-      if (!user || !(await verifyPassword(password, user.password))) {
+      if (
+        !globalUser?.email ||
+        !(await verifyPassword(password, globalUser.password))
+      ) {
         return res
           .status(400)
           .json(
@@ -187,12 +217,14 @@ export const login = async (req: Request, res: Response) => {
           );
       }
 
-      console.log({
-        isPassMatch: await verifyPassword(password, user.password),
+      const TenantUser = getTenantModel(User, globalUser.tenantId);
+
+      const user = await TenantUser.findOne({
+        where: { email: globalUser.email },
       });
 
       if (!user.isActive) {
-        await sendActivationEmail(user, false);
+        await sendAccountVerificationEmail(user, false);
         return res.status(400).json(
           customResponse({
             message: "Please check your mail to activate your account",
@@ -288,7 +320,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     })(),
     message: null,
     res,
-    resData: (user) => cleanUserData(user as User),
+    resData: (user) => cleanUserData(user as GlobalUser),
   });
 };
 
@@ -320,7 +352,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email } = req.body;
-      const user = await findUserByEmail(email);
+      const user = await GlobalUser.findOne({ where: { email } });
       if (!user) throw new Error("User not found");
 
       const resetToken = generateJwtToken(user.id, user.tenantId, {
@@ -370,14 +402,15 @@ export const resetPassword = async (req: Request, res: Response) => {
       if (!decoded) throw new Error("Invalid or expired token");
 
       const hashedPassword = await hashPassword(newPassword);
-      await User.update(
+
+      const TenantUser = getTenantModel(User, decoded.tenantId);
+
+      await TenantUser.update(
         { password: hashedPassword },
         { where: { id: decoded.userId } }
       );
-
-      return "Password reset successful";
     })(),
-    message: null,
+    message: "Password reset successful",
     res,
   });
 };

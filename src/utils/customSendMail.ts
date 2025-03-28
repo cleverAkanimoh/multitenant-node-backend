@@ -36,6 +36,6 @@ export const customSendMail = async ({
     debugLog("Email sent:", info.messageId);
   } catch (error) {
     debugLog("Error sending email:", error);
-    // throw new Error("Failed to send mail");
+    throw new Error("Failed to send mail");
   }
 };

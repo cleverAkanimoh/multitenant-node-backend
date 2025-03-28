@@ -1,11 +1,10 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import QRCode from "qrcode";
 import speakeasy from "speakeasy";
 import { customResponse } from "../../../utils/customResponse";
-import { AuthRequest } from "../middlewares";
 
 // Enable MFA
-export const enableMfa = async (req: AuthRequest, res: Response) => {
+export const enableMfa = async (req: Request, res: Response) => {
   try {
     const user = req.user;
     if (!user) return;
@@ -37,7 +36,7 @@ export const enableMfa = async (req: AuthRequest, res: Response) => {
 };
 
 // Verify MFA
-export const verifyMfa = async (req: AuthRequest, res: Response) => {
+export const verifyMfa = async (req: Request, res: Response) => {
   try {
     const { otp } = req.body;
     const user = req.user;

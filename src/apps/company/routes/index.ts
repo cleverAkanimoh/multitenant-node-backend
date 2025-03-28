@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "passport";
-import tenantMiddleware from "../../../middlewares/tenantMiddleware";
+
 import CompanyController from "../controllers";
 
 const router = Router();

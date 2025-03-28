@@ -18,13 +18,13 @@ router.get(
   userController.getCurrentUser
 );
 router.delete(
-  "/delete-user/:id",
+  "/delete-user",
   tenantMiddleware,
   authenticate as any,
   userController.deleteUserAccount
 );
 router.post(
-  "/deactivate-user/:id",
+  "/deactivate-user",
   authenticate as any,
   tenantMiddleware,
   userController.deactivateUserAccount

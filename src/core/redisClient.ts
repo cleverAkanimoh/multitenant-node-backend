@@ -13,7 +13,7 @@ const redisClient = createClient({ url: process.env.REDIS_URL });
 
 redisClient.on("error", (err) => {
   debugLog("Redis Client Error\n", err);
-  redisClient.disconnect();
+//  redisClient.disconnect();
 });
 
 export default redisClient;

@@ -31,7 +31,6 @@ setupWebSocketServer(server);
 configAppRoutes(app, express);
 
 const PORT = process.env.PORT;
- debugLog(PORT);
 
 (async () => {
   try {

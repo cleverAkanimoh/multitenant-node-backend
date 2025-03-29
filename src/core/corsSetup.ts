@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
 import cors from "cors";
 import { Express } from "express";
 import { debugLog } from "../utils/debugLog";
+
+dotenv.config();
 
 const corsSetup = (app: Express) => {
   app.use(

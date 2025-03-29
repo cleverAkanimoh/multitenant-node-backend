@@ -16,6 +16,7 @@ export const configAppRoutes = (app: Express, express: any) => {
   setupSwagger(app);
 
   app.use("/auth", authRoutes);
+  app.use("/dashboard", authRoutes);
   app.use("/companies", companyRoutes);
   app.use("/storage", storageRoutes);
 

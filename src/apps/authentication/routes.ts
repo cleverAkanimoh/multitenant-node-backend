@@ -1,7 +1,6 @@
 import { Router } from "express";
 import * as userController from "./controllers/userControllers";
 
-import tenantMiddleware from "../../middlewares/tenantMiddleware";
 import * as multiFAController from "./controllers/multiFA";
 import { authenticate } from "./middlewares";
 
@@ -11,22 +10,12 @@ router.post("/register", userController.registerUser);
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
 
-router.get(
-  "/current-user",
-  tenantMiddleware,
-  authenticate as any,
-  userController.getCurrentUser
-);
-router.delete(
-  "/delete-user/:id",
-  tenantMiddleware,
-  authenticate as any,
-  userController.deleteUserAccount
-);
+router.get("/current-user", authenticate, userController.getCurrentUser);
+
+router.delete("/delete-user", authenticate, userController.deleteUserAccount);
 router.post(
-  "/deactivate-user/:id",
-  authenticate as any,
-  tenantMiddleware,
+  "/deactivate-user",
+  authenticate,
   userController.deactivateUserAccount
 );
 
@@ -35,22 +24,21 @@ router.post("/forgot-password", userController.forgotPassword);
 router.post("/reset-password", userController.resetPassword);
 router.post(
   "/change-password",
-  authenticate as any,
-  tenantMiddleware,
-  userController.changePassword as any
+
+  userController.changePassword
 );
 
 router.post(
   "/enable-mfa",
   authenticate,
-  tenantMiddleware,
-  multiFAController.enableMfa as any
+
+  multiFAController.enableMfa
 );
 router.post(
   "/verify-mfa",
   authenticate,
-  tenantMiddleware,
-  multiFAController.verifyMfa as any
+
+  multiFAController.verifyMfa
 );
 
 export default router;

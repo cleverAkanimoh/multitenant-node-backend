@@ -17,7 +17,6 @@ import {
   deactivateUser,
   deleteUser,
 } from "../../users/services";
-import { AuthRequest } from "../middlewares";
 import {
   changePasswordSchema,
   forgotPasswordSchema,
@@ -269,13 +268,13 @@ export const login = async (req: Request, res: Response) => {
  *       401:
  *         description: Unauthorized
  */
-export const changePassword = async (req: AuthRequest, res: Response) => {
+export const changePassword = async (req: Request, res: Response) => {
   const { error } = changePasswordSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
   return handleRequests({
     promise: (async () => {
-      if (!req.user) throw new Error("Unauthorized");
+      if (!req.user) throw new Error("You're not supposed to be here");
 
       const user = req.user;
       if (!(await verifyPassword(req.body.oldPassword, user.password))) {
@@ -283,14 +282,16 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       }
 
       const hashedPassword = await hashPassword(req.body.newPassword);
+
+      
       await User.update(
         { password: hashedPassword },
         { where: { id: user.id } }
       );
 
-      return "Password changed successfully";
+      return ;
     })(),
-    message: null,
+    message: "Password changed successfully",
     res,
   });
 };

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import ModelViewSet from "../../../shared/ModelViewset";
+import ModelViewSet from "../../shared/controllers/ModelViewset";
 import Company, { StructureLevel } from "../models";
 
 export const companySchema = Joi.object({

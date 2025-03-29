@@ -4,7 +4,7 @@ import {
   handleNotFound,
   handleRequests,
   handleValidationError,
-} from "../utils/handleRequests";
+} from "../../../utils/handleRequests";
 
 class ModelViewSet<T extends Model> {
   private model: ModelStatic<T>;

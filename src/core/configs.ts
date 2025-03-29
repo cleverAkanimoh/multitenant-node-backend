@@ -1,11 +1,5 @@
-export const frontendUrl =
-  process.env.NODE_ENV === "production"
-    ? "http://localhost:3000"
-    : "http://localhost:3000";
+export const frontendUrl = process.env.FRONTEND_URL
 
-export const baseUrl =
-  process.env.NODE_ENV === "production"
-    ? "http://localhost:8000"
-    : "http://localhost:8000";
+export const baseUrl = process.env.BASE_URL 
 
 export const docTitle = "Emetrics Suite API Documentation";

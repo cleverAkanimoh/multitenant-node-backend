@@ -282,14 +282,16 @@ export const changePassword = async (req: Request, res: Response) => {
       }
 
       const hashedPassword = await hashPassword(req.body.newPassword);
+
+      
       await User.update(
         { password: hashedPassword },
         { where: { id: user.id } }
       );
 
-      return "Password changed successfully";
+      return ;
     })(),
-    message: null,
+    message: "Password changed successfully",
     res,
   });
 };

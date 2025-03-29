@@ -10,22 +10,12 @@ router.post("/register", userController.registerUser);
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
 
-router.get(
-  "/current-user",
+router.get("/current-user", authenticate, userController.getCurrentUser);
 
-  authenticate,
-  userController.getCurrentUser
-);
-router.delete(
-  "/delete-user",
-
-  authenticate,
-  userController.deleteUserAccount
-);
+router.delete("/delete-user", authenticate, userController.deleteUserAccount);
 router.post(
   "/deactivate-user",
   authenticate,
-
   userController.deactivateUserAccount
 );
 

@@ -22,7 +22,8 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   const token = req.header("Authorization")?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "You are not authorized" });
+  if (!token)
+    return res.status(401).json({ error: "You are not supposed to be here" });
 
   try {
     const decoded = verifyJwtToken(token);

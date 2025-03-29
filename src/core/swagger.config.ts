@@ -44,7 +44,7 @@ export const redocConfig = { title: docTitle, specUrl: "/redoc" };
 export const setupSwagger = (app: Express) => {
   app.use("/docs", swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
   app.get("/redoc", redoc(redocConfig));
-  debugLog("📃 Swagger docs available at http://localhost:8000/docs");
+  debugLog("📃 Swagger docs available at "+baseUrl+"/docs");
 };
 
 export default setupSwagger;

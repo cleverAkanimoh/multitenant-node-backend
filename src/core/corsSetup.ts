@@ -5,6 +5,7 @@ import { debugLog } from "../utils/debugLog";
 
 dotenv.config();
 
+debugLog(process.env.ALLOWED_ORIGIN);
 const corsSetup = (app: Express) => {
   app.use(
     cors({

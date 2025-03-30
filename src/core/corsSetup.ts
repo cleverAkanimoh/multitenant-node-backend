@@ -1,11 +1,14 @@
 import cors from "cors";
+import dotenv from "dotenv";
 import { Express } from "express";
 import { debugLog } from "../utils/debugLog";
+
+dotenv.config();
 
 const corsSetup = (app: Express) => {
   app.use(
     cors({
-      origin: ,
+      origin: process.env.ALLOWED_ORIGIN,
       optionsSuccessStatus: 200,
       //   exposedHeaders: "",
       //   preflightContinue:true,

@@ -30,7 +30,7 @@ setupWebSocketServer(server);
 // Routes
 configAppRoutes(app, express);
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 
 (async () => {
   try {

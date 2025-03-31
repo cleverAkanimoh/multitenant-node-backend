@@ -6,10 +6,7 @@ import {
 import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
-import {
-  hashPassword,
-  sendAccountVerificationEmail,
-} from "../authentication/services";
+import { hashPassword } from "../authentication/services";
 import Company from "../company/models";
 import GlobalUser from "../shared/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
@@ -154,7 +151,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         {
           id: newUser.id,
           email: newUser.email,
-          name: newUser.email,
+          name: newUser.name,
           password: hashedPassword,
           tenantId: tenantIdIfNone,
           userRole: newUser.userRole,
@@ -162,7 +159,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         { transaction }
       );
 
-      await sendAccountVerificationEmail(gUser);
+      // await sendAccountVerificationEmail(gUser);
 
       return newUser;
     });

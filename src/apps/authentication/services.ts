@@ -31,12 +31,12 @@ export const sendAccountVerificationEmail = async (
   });
 
   const activationLink = `${frontendUrl}/verify-account?token=${activationToken}`;
-
-  const cleanData = await cleanUserData(user);
+  const cleanData = await cleanUserData?.(user);
+  // debugLog({ user, cleanData });
 
   const html = generateEmailTemplate({
     title: newUser ? "Welcome to E-Metrics Suite!" : "Verify your account",
-    message: `Hello ${cleanData.firstName || user.email.split("@")[0]}, ${
+    message: `Hello ${cleanData?.firstName || user.email.split("@")[0]}, ${
       newUser ? "Welcome to E-Metrics Suite" : "Please verify your account"
     }. Kindly click the button below to activate your account`,
     buttonText: "Activate Account",

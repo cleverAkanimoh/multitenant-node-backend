@@ -38,4 +38,6 @@ export const companySchema = Joi.object({
 
 
 const CompanyController = new ModelViewSet(Company, companySchema);
+
+
 export default CompanyController;

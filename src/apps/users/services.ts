@@ -132,7 +132,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         },
         { transaction }
       );
-      console.log({ userData });
+      console.log({ name: userData.name });
 
       const newUser = await TenantUser.create(
         {
@@ -176,7 +176,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   } catch (error) {
     debugLog("Deleting tenant schema", error);
     await deleteTenantSchema(tenantIdIfNone);
-    throw error;
+    throw new Error("An error occurred while creating your Organization");
   }
 };
 

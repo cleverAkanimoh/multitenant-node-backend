@@ -277,16 +277,17 @@ export const changePassword = async (req: Request, res: Response) => {
       if (!req.user) throw new Error("You're not supposed to be here");
 
       const user = req.user;
-      if (!(await verifyPassword(req.body.oldPassword, user.password))) {
+      if (
+        !(await verifyPassword(req.body.oldPassword, (user as any).password))
+      ) {
         throw new Error("Old password is incorrect");
       }
 
       const hashedPassword = await hashPassword(req.body.newPassword);
 
-      
       await User.update(
         { password: hashedPassword },
-        { where: { id: user.id } }
+        { where: { id: (user as any).id } }
       );
 
       return ;

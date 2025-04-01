@@ -9,6 +9,7 @@ import { setupWebSocketServer } from "./core/websocket";
 import { configureMiddleware } from "./middlewares";
 import { configAppRoutes } from "./routes";
 import { debugLog } from "./utils/debugLog";
+import { syncTenantSchemas } from "./core/multitenancy";
 
 dotenv.config();
 
@@ -42,6 +43,9 @@ const PORT = process.env.PORT;
       // force: true, // process.env.NODE_ENV === "development"
     });
     debugLog("✅ All models synchronized.");
+
+    // Sync tenant schemas
+    await syncTenantSchemas();
 
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);

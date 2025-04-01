@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
-import sequelize from "../../../core/orm";
-import User from "../../users/models/user";
+import sequelize from "../../../../core/orm";
+import User from "../../../users/models/user";
 
 export enum StructureLevel {
   CORPORATE = "corporate",

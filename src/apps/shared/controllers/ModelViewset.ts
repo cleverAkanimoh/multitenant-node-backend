@@ -1,11 +1,18 @@
 import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
+import { getTenantModel } from "../../../core/multitenancy";
 import {
   handleNotFound,
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
 
+/**
+ * @swagger
+ * tags:
+ *   name: ModelViewSet
+ *   description: Generic CRUD operations for models
+ */
 class ModelViewSet<T extends Model> {
   private model: ModelStatic<T>;
   private schema?: any;
@@ -15,20 +22,48 @@ class ModelViewSet<T extends Model> {
     this.schema = schema;
   }
 
-  // get current record
-
+  /**
+   * @swagger
+   * /current:
+   *   get:
+   *     summary: Get the current record
+   *     tags: [ModelViewSet]
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved the current record
+   *       404:
+   *         description: Record not found
+   */
   current = async (req: Request, res: Response) => {
+    console.log(req.company);
 
-     console.log(req.company);
+    const TenantModel = getTenantModel(this.model, req.company);
 
-     return handleRequests({
-       promise: this.model.findByPk(req.company),
-       message: null,
-       res,
-     });
+    return handleRequests({
+      promise: TenantModel.findByPk(req.company),
+      message: null,
+      res,
+    });
   };
 
-  // 🔹 Create a new record
+  /**
+   * @swagger
+   * /create:
+   *   post:
+   *     summary: Create a new record
+   *     tags: [ModelViewSet]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *     responses:
+   *       201:
+   *         description: Successfully created a new record
+   *       400:
+   *         description: Validation error
+   */
   create = async (req: Request, res: Response) => {
     if (this.schema) {
       const { error } = this.schema.validate(req.body);
@@ -37,13 +72,33 @@ class ModelViewSet<T extends Model> {
 
     return await handleRequests({
       promise: this.model.create(req.body),
-      message: `${this.model.name} created successfully`,
+      message: `${this.model.name || ""} created successfully`,
       res,
       statusCode: 201,
     });
   };
 
-  // 🔹 Get all records with pagination
+  /**
+   * @swagger
+   * /list:
+   *   get:
+   *     summary: Get all records with pagination
+   *     tags: [ModelViewSet]
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *         description: Page number
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *         description: Number of records per page
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved records
+   */
   list = async (req: Request, res: Response) => {
     const { page = 1, limit = 10 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -63,7 +118,25 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  // 🔹 Get a single record by ID
+  /**
+   * @swagger
+   * /retrieve/{id}:
+   *   get:
+   *     summary: Get a single record by ID
+   *     tags: [ModelViewSet]
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Record ID
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved the record
+   *       404:
+   *         description: Record not found
+   */
   retrieve = async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -81,7 +154,33 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  // 🔹 Update a record by ID
+  /**
+   * @swagger
+   * /update/{id}:
+   *   put:
+   *     summary: Update a record by ID
+   *     tags: [ModelViewSet]
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Record ID
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *     responses:
+   *       200:
+   *         description: Successfully updated the record
+   *       404:
+   *         description: Record not found
+   *       400:
+   *         description: Validation error
+   */
   update = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (this.schema) {
@@ -104,7 +203,25 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  // 🔹 Delete a record by ID
+  /**
+   * @swagger
+   * /destroy/{id}:
+   *   delete:
+   *     summary: Delete a record by ID
+   *     tags: [ModelViewSet]
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Record ID
+   *     responses:
+   *       200:
+   *         description: Successfully deleted the record
+   *       404:
+   *         description: Record not found
+   */
   destroy = async (req: Request, res: Response) => {
     const { id } = req.params;
 

@@ -1,3 +1,4 @@
+import Company from "../(dashboard)/company/models";
 import {
   createTenantSchema,
   deleteTenantSchema,
@@ -7,7 +8,6 @@ import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
 import { hashPassword } from "../authentication/services";
-import Company from "../company/models";
 import GlobalUser from "../shared/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 

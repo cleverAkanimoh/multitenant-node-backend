@@ -1,13 +1,12 @@
 import { Router } from "express";
-import People from "./peopleModel";
 import {
-  getAllPeople,
-  createPeople,
-  getPeopleById,
-  updatePeople,
-  deletePeople,
-  peopleUpload,
-} from "./peopleController";
+    createPeople,
+    deletePeople,
+    getAllPeople,
+    getPeopleById,
+    peopleUpload,
+    updatePeople,
+} from "../controllers";
 
 const router = Router();
 

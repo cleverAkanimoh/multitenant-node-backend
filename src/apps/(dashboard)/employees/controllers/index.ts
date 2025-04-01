@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { People } from "./peopleModel"; // Import People model
-import { PeopleSchema } from "./peopleSchema"; // Import Joi validation schema
+import People from "../models";
 
 // Get all people
 export const getAllPeople = async (req: Request, res: Response) => {
@@ -15,7 +14,7 @@ export const getAllPeople = async (req: Request, res: Response) => {
 // Add a new people
 export const createPeople = async (req: Request, res: Response) => {
   try {
-    const { error } = PeopleSchema.validate(req.body);
+    const { error } = peopleSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const people = await People.create(req.body);
@@ -39,7 +38,7 @@ export const getPeopleById = async (req: Request, res: Response) => {
 // Update an people’s profile
 export const updatePeople = async (req: Request, res: Response) => {
   try {
-    const { error } = PeopleSchema.validate(req.body);
+    const { error } = peopleSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const people = await People.findByPk(req.params.peopleId);
@@ -88,7 +87,6 @@ export const peopleUpload = async (req: Request, res: Response) => {
       data: createdPeople,
     });
   } catch (error) {
-    // Handle any errors that occurred during the upload process
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: (error as any).message });
   }
 };

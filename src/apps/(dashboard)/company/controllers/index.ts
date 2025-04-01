@@ -1,16 +1,11 @@
 import Joi from "joi";
 import ModelViewSet from "../../../shared/controllers/ModelViewset";
-import Company, { StructureLevel } from "../models";
+import Company from "../models";
 
 export const companySchema = Joi.object({
   name: Joi.string().optional(),
   shortName: Joi.string().optional(),
-  logo: Joi.alternatives()
-    .try(
-      Joi.string().uri(),
-      Joi.string().pattern(/\.(jpg|jpeg|png|gif|svg|webp|avif)$/i)
-    )
-    .required(),
+  logo: Joi.string().optional(),
   address: Joi.string().optional(),
   phoneNumber: Joi.string().optional(),
   email: Joi.string().email().optional(),
@@ -45,9 +40,7 @@ export const companySchema = Joi.object({
       .pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)
       .required(),
   }).required(),
-  structureLevel: Joi.string()
-    .valid(...Object.values(StructureLevel))
-    .optional(),
+  structureLevel: Joi.array().items(Joi.string()).optional(),
 });
 
 const CompanyController = new ModelViewSet({

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
 import * as XLSX from "xlsx";
 import { getTenantModel } from "../../../core/multitenancy";
+import { customResponse } from "../../../utils/customResponse";
 import {
   handleNotFound,
   handleRequests,
@@ -39,6 +40,8 @@ class ModelViewSet<T extends Model> {
   }
 
   current = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
+
     const TenantModel = this.isTenantModel
       ? getTenantModel(this.model, req.company)
       : this.model;
@@ -51,6 +54,7 @@ class ModelViewSet<T extends Model> {
   };
 
   create = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     if (this.schema) {
       const { error } = this.schema.validate(req.body);
       if (error) return handleValidationError(res, error);
@@ -71,6 +75,7 @@ class ModelViewSet<T extends Model> {
   };
 
   list = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
     const limitValue = Number(limit);
@@ -83,7 +88,7 @@ class ModelViewSet<T extends Model> {
       promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
       message: `${this.name || TenantModel.name || ""}s retrieved successfully`,
       res,
-      resData: (data:any) => ({
+      resData: (data: any) => ({
         total: data.count,
         page: Number(page),
         perPage: limitValue,
@@ -94,6 +99,7 @@ class ModelViewSet<T extends Model> {
   };
 
   retrieve = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const { id } = req.params;
 
     await handleRequests({
@@ -114,10 +120,16 @@ class ModelViewSet<T extends Model> {
   };
 
   update = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const { id } = req.params;
+
     if (this.schema) {
       const { error } = this.schema.validate(req.body);
       if (error) return handleValidationError(res, error);
+    }
+
+    if (!id) {
+      throw new Error("No id found in request param");
     }
 
     await withTransaction(async (transaction) => {
@@ -136,7 +148,15 @@ class ModelViewSet<T extends Model> {
               message: `${this.name || this.model.name || ""} not found`,
             });
           } else {
-            res.status(200).json(updatedRecord);
+            return res.status(200).json(
+              customResponse({
+                data: updatedRecord,
+                statusCode: 200,
+                message: `${
+                  this.name || this.model.name || ""
+                } updated successfully`,
+              })
+            );
           }
         },
       });
@@ -144,6 +164,7 @@ class ModelViewSet<T extends Model> {
   };
 
   bulkUpload = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const file = req.file;
 
     if (!file) {
@@ -218,6 +239,12 @@ function joiToSwagger(schema: any) {
       object: "object",
       date: "string",
     };
+
+    if (joiDesc.type === "alternatives") {
+      return {
+        oneOf: joiDesc.matches.map((match: any) => convert(match.schema)),
+      };
+    }
 
     const swaggerType = typeMap[joiDesc.type];
     if (!swaggerType) {

@@ -1,7 +1,6 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-// Define the schema
-const peopleSchema = Joi.object({
+const PeopleSchema = Joi.object({
   firstName: Joi.string().min(1).max(255).required(),
   lastName: Joi.string().min(1).max(255).required(),
   phoneNumber: Joi.string()
@@ -43,9 +42,8 @@ const peopleSchema = Joi.object({
   designationName: Joi.string().min(1).max(255).required(),
 });
 
-// Example validation function
 const validatePeople = (peopleData: any) => {
-  const { error, value } = peopleSchema.validate(peopleData);
+  const { error, value } = PeopleSchema.validate(peopleData);
   if (error) {
     console.log("Validation Error:", error.details);
     return false;
@@ -55,7 +53,6 @@ const validatePeople = (peopleData: any) => {
   }
 };
 
-// Example data to validate
 const peopleData = {
   firstname: "",
   lastname: "",

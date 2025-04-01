@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
 import * as XLSX from "xlsx";
 import { getTenantModel } from "../../../core/multitenancy";
+import { debugLog } from "../../../utils/debugLog";
 import {
   handleNotFound,
   handleRequests,
@@ -20,12 +21,17 @@ class ModelViewSet<T extends Model> {
   private name?: string;
   private isGlobal?: boolean;
 
-  constructor(
-    model: ModelStatic<T>,
-    schema?: any,
-    name?: string,
-    isGlobal?: boolean
-  ) {
+  constructor({
+    model,
+    isGlobal,
+    name,
+    schema,
+  }: {
+    model: ModelStatic<T>;
+    schema?: any;
+    name?: string;
+    isGlobal?: boolean;
+  }) {
     this.model = model;
     this.schema = schema;
     this.name = name;
@@ -45,9 +51,11 @@ class ModelViewSet<T extends Model> {
    *         description: Record not found
    */
   current = async (req: Request, res: Response) => {
-    console.log({ tenantId: req.company });
+    debugLog({ tenantId: req.company });
 
-    const TenantModel = getTenantModel(this.model, req.company);
+    const TenantModel = this.isGlobal
+      ? this.model
+      : getTenantModel(this.model, req.company);
 
     return handleRequests({
       promise: TenantModel.findByPk(req.company),

@@ -50,8 +50,11 @@ export const companySchema = Joi.object({
     .optional(),
 });
 
-
-const CompanyController = new ModelViewSet(Company, companySchema);
-
+const CompanyController = new ModelViewSet({
+  model: Company,
+  schema: companySchema,
+  name: "Organization",
+  isGlobal: true,
+});
 
 export default CompanyController;

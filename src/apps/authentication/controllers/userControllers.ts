@@ -6,8 +6,6 @@ import {
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
-import GlobalUser from "../../shared/models";
-import { findGlobalUserByEmail } from "../../shared/services";
 import User, { Roles } from "../../users/models/user";
 import {
   cleanUserData,
@@ -16,6 +14,7 @@ import {
   createSuperAdmin,
   deactivateUser,
   deleteUser,
+  findUserByEmail,
 } from "../../users/services";
 import {
   changePasswordSchema,
@@ -92,13 +91,14 @@ import {
  *       500:
  *         description: Internal Server Error
  */
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   const { error } = userSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 
-  const existingUser = await findGlobalUserByEmail(
-    req.body.email.toLowerCase()
-  );
+  const existingUser = await findUserByEmail(req.body.email.toLowerCase());
 
   if (existingUser) {
     return res.status(400).json(
@@ -203,7 +203,7 @@ export const login = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email, password } = req.body;
-      const globalUser = await findGlobalUserByEmail(email.toLowerCase());
+      const globalUser = await findUserByEmail(email.toLowerCase());
 
       if (
         !globalUser?.email ||
@@ -277,19 +277,20 @@ export const changePassword = async (req: Request, res: Response) => {
       if (!req.user) throw new Error("You're not supposed to be here");
 
       const user = req.user;
-      if (!(await verifyPassword(req.body.oldPassword, user.password))) {
+      if (
+        !(await verifyPassword(req.body.oldPassword, (user as any).password))
+      ) {
         throw new Error("Old password is incorrect");
       }
 
       const hashedPassword = await hashPassword(req.body.newPassword);
 
-      
       await User.update(
         { password: hashedPassword },
-        { where: { id: user.id } }
+        { where: { id: (user as any).id } }
       );
 
-      return ;
+      return;
     })(),
     message: "Password changed successfully",
     res,
@@ -321,7 +322,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     })(),
     message: null,
     res,
-    resData: (user) => cleanUserData(user as GlobalUser),
+    resData: (user) => cleanUserData(user as User),
   });
 };
 
@@ -353,7 +354,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email } = req.body;
-      const user = await GlobalUser.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email } });
       if (!user) throw new Error("User not found");
 
       const resetToken = generateJwtToken(user.id, user.tenantId, {

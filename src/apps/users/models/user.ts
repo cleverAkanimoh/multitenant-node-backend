@@ -1,4 +1,5 @@
 import { DataTypes, Model, Optional } from "sequelize";
+import Company from "../../(dashboard)/company/models";
 import sequelize from "../../../core/orm";
 
 export enum Roles {
@@ -93,11 +94,17 @@ User.init(
     },
     isMfaEnabled: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
     },
     tenantId: {
       type: DataTypes.STRING,
       allowNull: false,
+      references: {
+        model: Company,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
   },
   {

@@ -4,6 +4,7 @@ import express from "express";
 
 import { createServer } from "http";
 import corsSetup from "./core/corsSetup";
+import { syncTenantSchemas } from "./core/multitenancy";
 import sequelize from "./core/orm";
 import { setupWebSocketServer } from "./core/websocket";
 import { configureMiddleware } from "./middlewares";
@@ -41,7 +42,10 @@ const PORT = process.env.PORT;
       alter: true,
       // force: true, // process.env.NODE_ENV === "development"
     });
-    debugLog("✅ All models synchronized.");
+    debugLog("✅ Public schema synchronized.");
+
+    // Sync tenant schemas
+    await syncTenantSchemas();
 
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);

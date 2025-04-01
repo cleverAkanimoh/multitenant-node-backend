@@ -1,8 +1,8 @@
 import { Express } from "express";
 import { baseUrl } from "./core/configs";
 
+import { getDashboardEndpoints } from "./apps/(dashboard)/routes";
 import authRoutes from "./apps/authentication/routes";
-import companyRoutes from "./apps/company/routes";
 import storageRoutes from "./apps/storage/routes";
 import { setupSwagger } from "./core/swagger.config";
 
@@ -16,8 +16,7 @@ export const configAppRoutes = (app: Express, express: any) => {
   setupSwagger(app);
 
   app.use("/auth", authRoutes);
-  app.use("/dashboard", authRoutes);
-  app.use("/companies", companyRoutes);
+  getDashboardEndpoints(app);
   app.use("/storage", storageRoutes);
 
   debugLog("All endpoints started at " + baseUrl);

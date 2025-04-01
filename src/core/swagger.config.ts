@@ -4,8 +4,8 @@ import swaggerUi from "swagger-ui-express";
 import redoc from "redoc-express";
 import swaggerJSDoc from "swagger-jsdoc";
 
-import { baseUrl, docTitle } from "./configs";
 import { debugLog } from "../utils/debugLog";
+import { baseUrl, docTitle } from "./configs";
 
 const endpointsFiles = [
   "./src/apps/**/routes.ts",
@@ -31,6 +31,9 @@ const swaggerOptions = {
           bearerFormat: "JWT",
         },
       },
+      // requestBodies: {
+      //   CreateRequestBody: (ModelViewSet as any).getRequestBodySchema(),
+      // },
     },
     security: [{ BearerAuth: [] }],
   },

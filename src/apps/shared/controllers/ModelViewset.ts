@@ -7,7 +7,6 @@ import {
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
-import { findGlobalUserById } from "../services";
 
 /**
  * @swagger
@@ -38,8 +37,6 @@ class ModelViewSet<T extends Model> {
    */
   current = async (req: Request, res: Response) => {
     console.log({ tenantId: req.company });
-
-    
 
     const TenantModel = getTenantModel(this.model, req.company);
 

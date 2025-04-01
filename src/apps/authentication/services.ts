@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import { frontendUrl } from "../../core/configs";
 import { TToken } from "../../types/token";
 import { customSendMail } from "../../utils/customSendMail";
+import { debugLog } from "../../utils/debugLog";
 import { generateEmailTemplate } from "../../utils/generateEmailTemplate";
-import GlobalUser from "../shared/models";
+import User from "../users/models/user";
 import { cleanUserData } from "../users/services";
 
 export const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -23,16 +24,16 @@ export const verifyJwtToken = (token: string) => {
 };
 
 export const sendAccountVerificationEmail = async (
-  user: GlobalUser,
+  user: User,
   newUser: boolean = true
 ) => {
-  const activationToken = generateJwtToken(user.id || "", user.tenantId, {
+  const activationToken = generateJwtToken(user.id, user.tenantId, {
     expiresIn: "1h",
   });
 
   const activationLink = `${frontendUrl}/verify-account?token=${activationToken}`;
-  const cleanData = await cleanUserData?.(user);
-  // debugLog({ user, cleanData });
+  const cleanData = await cleanUserData(user);
+  debugLog({ user, cleanData, activationLink });
 
   const html = generateEmailTemplate({
     title: newUser ? "Welcome to E-Metrics Suite!" : "Verify your account",
@@ -50,7 +51,7 @@ export const sendAccountVerificationEmail = async (
   });
 };
 
-export const sendResetEmail = async (user: GlobalUser, token: string) => {
+export const sendResetEmail = async (user: User, token: string) => {
   const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
   const cleanData = await cleanUserData(user);
   await customSendMail({

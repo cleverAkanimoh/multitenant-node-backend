@@ -11,7 +11,6 @@ import {
   hashPassword,
   sendAccountVerificationEmail,
 } from "../authentication/services";
-import GlobalUser from "../shared/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
 export const findUserById = async (id: string, attributes?: string[]) => {
@@ -22,7 +21,7 @@ export const findUserByEmail = async (email: string) => {
   return User.findOne({ where: { email } });
 };
 
-export const cleanUserData = async (gUser: GlobalUser) => {
+export const cleanUserData = async (gUser: User) => {
   const TenantUser = getTenantModel(User, gUser.tenantId);
 
   const user = await TenantUser.findByPk(gUser.id);
@@ -94,7 +93,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   const hashedPassword = await hashPassword(userData.password);
 
   if (isSuperAdmin && userData.tenantId) {
-    const superAdminExists = await GlobalUser.findOne({
+    const superAdminExists = await User.findOne({
       where: { tenantId: userData.tenantId },
     });
 
@@ -140,29 +139,18 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         { transaction }
       );
 
-      console.log({ name: newUser.name });
-
-      // Update the company record with the new user's ID as ownerId
       company.ownerId = newUser.id;
       await company.save({ transaction });
 
-      console.log({ owner: company.ownerId });
-
-      const gUser = await GlobalUser.create(
+      const user = await User.create(
         {
+          ...newUser,
           id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-          password: hashedPassword,
-          tenantId: newUser.tenantId,
-          userRole: newUser.userRole,
         },
         { transaction }
       );
 
-      console.log({ gUser: gUser.name });
-
-      await sendAccountVerificationEmail(gUser);
+      await sendAccountVerificationEmail(user);
 
       return newUser;
     });

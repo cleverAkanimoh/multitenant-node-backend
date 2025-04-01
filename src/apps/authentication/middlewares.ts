@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import Company from "../(dashboard)/company/models";
 import { getTenantModel } from "../../core/multitenancy";
 import { customResponse } from "../../utils/customResponse";
 import { debugLog } from "../../utils/debugLog";
-import { findGlobalUserById } from "../shared/services";
 import User from "../users/models/user";
+import { findUserById } from "../users/services";
 import { verifyJwtToken } from "./services";
 
 declare global {
@@ -13,7 +12,6 @@ declare global {
       user?: User | undefined;
       company: string;
       tenantUserModel?: User;
-      tenantCompanyModel?: Company;
     }
   }
 }
@@ -30,7 +28,7 @@ export const authenticate = async (
   try {
     const decoded = verifyJwtToken(token);
 
-    const gUser = await findGlobalUserById(decoded.userId);
+    const gUser = await findUserById(decoded.userId);
 
     if (!gUser) throw new Error("Invalid token or expired token");
 
@@ -41,7 +39,7 @@ export const authenticate = async (
     req.user = user;
     req.company = decoded.tenantId;
     req.tenantUserModel = getTenantModel(User, decoded.tenantId);
-    req.tenantCompanyModel = getTenantModel(Company, decoded.tenantId);
+
     next();
   } catch (error) {
     debugLog("Authenticate middleware ", error);

@@ -12,5 +12,4 @@ router.get("/:id", CompanyController.retrieve);
 router.put("/:id", CompanyController.update);
 router.delete("/:id", CompanyController.destroy);
 
-
 export default router;

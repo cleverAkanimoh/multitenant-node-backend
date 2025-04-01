@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
 import * as XLSX from "xlsx";
 import { getTenantModel } from "../../../core/multitenancy";
+import { customResponse } from "../../../utils/customResponse";
 import {
   handleNotFound,
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
+import { withTransaction } from "../../../utils/withTransaction";
 
 /**
  * @swagger
@@ -17,28 +19,32 @@ import {
 class ModelViewSet<T extends Model> {
   private model: ModelStatic<T>;
   private schema?: any;
+  private name?: string;
+  private isTenantModel?: boolean;
 
-  constructor(model: ModelStatic<T>, schema?: any) {
+  constructor({
+    model,
+    isTenantModel = true,
+    name,
+    schema,
+  }: {
+    model: ModelStatic<T>;
+    schema?: any;
+    name?: string;
+    isTenantModel?: boolean;
+  }) {
     this.model = model;
     this.schema = schema;
+    this.name = name;
+    this.isTenantModel = isTenantModel;
   }
 
-  /**
-   * @swagger
-   * /current:
-   *   get:
-   *     summary: Get the current record
-   *     tags: [ModelViewSet]
-   *     responses:
-   *       200:
-   *         description: Successfully retrieved the current record
-   *       404:
-   *         description: Record not found
-   */
   current = async (req: Request, res: Response) => {
-    console.log({ tenantId: req.company });
+    joiToSwagger(this.schema);
 
-    const TenantModel = getTenantModel(this.model, req.company);
+    const TenantModel = this.isTenantModel
+      ? getTenantModel(this.model, req.company)
+      : this.model;
 
     return handleRequests({
       promise: TenantModel.findByPk(req.company),
@@ -47,79 +53,42 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  getRequestBodySchema() {
-    if (this.schema) {
-      return {
-        required: true,
-        content: {
-          "application/json": {
-            schema: joiToSwagger(this.schema),
-          },
-        },
-      };
-    }
-    return undefined;
-  }
-
-  /**
-   * @swagger
-   * /create:
-   *   post:
-   *     summary: Create a new record
-   *     tags: [ModelViewSet]
-   *     requestBody:
-   *       $ref: '#/components/requestBodies/CreateRequestBody'
-   *     responses:
-   *       201:
-   *         description: Successfully created a new record
-   *       400:
-   *         description: Validation error
-   */
   create = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     if (this.schema) {
       const { error } = this.schema.validate(req.body);
       if (error) return handleValidationError(res, error);
     }
 
-    return await handleRequests({
-      promise: this.model.create(req.body),
-      message: `${this.model.name || ""} created successfully`,
-      res,
-      statusCode: 201,
+    const TenantModel = this.isTenantModel
+      ? getTenantModel(this.model, req.company)
+      : this.model;
+
+    return await withTransaction(async (transaction) => {
+      return await handleRequests({
+        promise: TenantModel.create(req.body, { transaction }),
+        message: `${this.name || TenantModel.name || ""} created successfully`,
+        res,
+        statusCode: 201,
+      });
     });
   };
 
-  /**
-   * @swagger
-   * /list:
-   *   get:
-   *     summary: Get all records with pagination
-   *     tags: [ModelViewSet]
-   *     parameters:
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *         description: Number of records per page
-   *     responses:
-   *       200:
-   *         description: Successfully retrieved records
-   */
   list = async (req: Request, res: Response) => {
-    const { page = 1, limit = 10 } = req.query;
+    joiToSwagger(this.schema);
+    const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
     const limitValue = Number(limit);
 
+    const TenantModel = this.isTenantModel
+      ? getTenantModel(this.model, req.company)
+      : this.model;
+
     await handleRequests({
-      promise: this.model.findAndCountAll({ limit: limitValue, offset }),
-      message: `${this.model.name}s retrieved successfully`,
+      promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
+      message: `${this.name || TenantModel.name || ""}s retrieved successfully`,
       res,
-      resData: (data) => ({
+      resData: (data: any) => ({
         total: data.count,
         page: Number(page),
         perPage: limitValue,
@@ -129,35 +98,20 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  /**
-   * @swagger
-   * /retrieve/{id}:
-   *   get:
-   *     summary: Get a single record by ID
-   *     tags: [ModelViewSet]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: Record ID
-   *     responses:
-   *       200:
-   *         description: Successfully retrieved the record
-   *       404:
-   *         description: Record not found
-   */
   retrieve = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const { id } = req.params;
 
     await handleRequests({
       promise: this.model.findByPk(id),
-      message: `${this.model.name} retrieved successfully`,
+      message: `${this.name || this.model.name || ""} retrieved successfully`,
       res,
       resData: (record) => {
         if (!record) {
-          handleNotFound({ res, message: `${this.model.name} not found` });
+          handleNotFound({
+            res,
+            message: `${this.name || this.model.name || ""} not found`,
+          });
           return null;
         }
         return record;
@@ -165,73 +119,52 @@ class ModelViewSet<T extends Model> {
     });
   };
 
-  /**
-   * @swagger
-   * /update/{id}:
-   *   put:
-   *     summary: Update a record by ID
-   *     tags: [ModelViewSet]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: Record ID
-   *     requestBody:
-   *       $ref: '#/components/requestBodies/UpdateRequestBody'
-   *     responses:
-   *       200:
-   *         description: Successfully updated the record
-   *       400:
-   *         description: Validation error
-   */
   update = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const { id } = req.params;
+
     if (this.schema) {
       const { error } = this.schema.validate(req.body);
       if (error) return handleValidationError(res, error);
     }
 
-    await handleRequests({
-      promise: this.model.update(req.body, { where: { id: id as any } }),
-      message: `${this.model.name} updated successfully`,
-      res,
-      callback: async () => {
-        const updatedRecord = await this.model.findByPk(id);
-        if (!updatedRecord) {
-          handleNotFound({ res, message: `${this.model.name} not found` });
-        } else {
-          res.status(200).json(updatedRecord);
-        }
-      },
+    if (!id) {
+      throw new Error("No id found in request param");
+    }
+
+    await withTransaction(async (transaction) => {
+      await handleRequests({
+        promise: this.model.update(req.body, {
+          where: { id: id as any },
+          transaction,
+        }),
+        message: `${this.name || this.model.name || ""} updated successfully`,
+        res,
+        callback: async () => {
+          const updatedRecord = await this.model.findByPk(id, { transaction });
+          if (!updatedRecord) {
+            handleNotFound({
+              res,
+              message: `${this.name || this.model.name || ""} not found`,
+            });
+          } else {
+            return res.status(200).json(
+              customResponse({
+                data: updatedRecord,
+                statusCode: 200,
+                message: `${
+                  this.name || this.model.name || ""
+                } updated successfully`,
+              })
+            );
+          }
+        },
+      });
     });
   };
 
-  /**
-   * @swagger
-   * /bulk-upload:
-   *   post:
-   *     summary: Bulk upload records from an Excel file
-   *     tags: [ModelViewSet]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         multipart/form-data:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               file:
-   *                 type: string
-   *                 format: binary
-   *                 description: Excel file to upload
-   *     responses:
-   *       201:
-   *         description: Successfully uploaded records
-   *       400:
-   *         description: Validation error or invalid file format
-   */
   bulkUpload = async (req: Request, res: Response) => {
+    joiToSwagger(this.schema);
     const file = req.file;
 
     if (!file) {
@@ -253,11 +186,13 @@ class ModelViewSet<T extends Model> {
         }
       }
 
-      await handleRequests({
-        promise: this.model.bulkCreate(data as any),
-        message: `${this.model.name || ""} records uploaded successfully`,
-        res,
-        statusCode: 201,
+      await withTransaction(async (transaction) => {
+        await handleRequests({
+          promise: this.model.bulkCreate(data as any, { transaction }),
+          message: `${this.model.name || ""} records uploaded successfully`,
+          res,
+          statusCode: 201,
+        });
       });
     } catch (error) {
       res
@@ -266,39 +201,29 @@ class ModelViewSet<T extends Model> {
     }
   };
 
-  /**
-   * @swagger
-   * /delete/{id}:
-   *   delete:
-   *     summary: Delete a record by ID
-   *     tags: [ModelViewSet]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: Record ID
-   *     responses:
-   *       200:
-   *         description: Successfully deleted the record
-   *       404:
-   *         description: Record not found
-   */
   destroy = async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    await handleRequests({
-      promise: this.model.destroy({ where: { id: id as any } }),
-      message: `${this.model.name} deleted successfully`,
-      res,
-      resData: (deleted) => {
-        if (!deleted) {
-          handleNotFound({ res, message: `${this.model.name} not found` });
-          return null;
-        }
-        return { message: `${this.model.name} deleted successfully` };
-      },
+    await withTransaction(async (transaction) => {
+      await handleRequests({
+        promise: this.model.destroy({ where: { id: id as any }, transaction }),
+        message: `${this.name || this.model.name || ""} deleted successfully`,
+        res,
+        resData: (deleted) => {
+          if (!deleted) {
+            handleNotFound({
+              res,
+              message: `${this.name || this.model.name || ""} not found`,
+            });
+            return null;
+          }
+          return {
+            message: `${
+              this.name || this.model.name || ""
+            } deleted successfully`,
+          };
+        },
+      });
     });
   };
 }
@@ -314,6 +239,12 @@ function joiToSwagger(schema: any) {
       object: "object",
       date: "string",
     };
+
+    if (joiDesc.type === "alternatives") {
+      return {
+        oneOf: joiDesc.matches.map((match: any) => convert(match.schema)),
+      };
+    }
 
     const swaggerType = typeMap[joiDesc.type];
     if (!swaggerType) {

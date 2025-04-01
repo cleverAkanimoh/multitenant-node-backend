@@ -11,7 +11,7 @@ export const enableMfa = async (req: Request, res: Response) => {
 
     const secret = speakeasy.generateSecret({ length: 20 });
 
-    await user.update({
+    await (user as any).update({
       mfaSecret: secret.base32,
       isMfaEnabled: true,
     });
@@ -42,7 +42,7 @@ export const verifyMfa = async (req: Request, res: Response) => {
     const user = req.user;
     if (!user) return;
 
-    if (!user.mfaSecret) {
+    if (!(user as any).mfaSecret) {
       return res.status(400).json(
         customResponse({
           message: "Multi-factor authentication not set up",
@@ -52,7 +52,7 @@ export const verifyMfa = async (req: Request, res: Response) => {
     }
 
     const isValid = speakeasy.totp.verify({
-      secret: user.mfaSecret,
+      secret: (user as any).mfaSecret,
       encoding: "base32",
       token: otp,
       window: 1,

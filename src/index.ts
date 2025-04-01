@@ -20,6 +20,7 @@ corsSetup(app);
 
 // json
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Middlewares
 configureMiddleware(app);
@@ -37,11 +38,14 @@ const PORT = process.env.PORT;
     await sequelize.authenticate();
     debugLog("✅ Database connected successfully.");
 
-    await sequelize.sync({
-      alter: true,
-      // force: true, // process.env.NODE_ENV === "development"
-    });
-    debugLog("✅ All models synchronized.");
+    // await sequelize.sync({
+    //   alter: true,
+    //  // force: true, // process.env.NODE_ENV === "development"
+    // });
+    // debugLog("✅ Public schema synchronized.");
+
+    // // Sync tenant schemas
+    // await syncTenantSchemas();
 
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);

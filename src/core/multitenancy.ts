@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { QueryTypes, Sequelize } from "sequelize";
 import Company from "../apps/(dashboard)/company/models";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
@@ -22,6 +22,14 @@ export const createTenantSchema = async (tenantId: string) => {
   await sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${tenantId}";`);
 
   debugLog(tenantId, "created successfully");
+};
+
+export const checkIfSchemaExists = async (schemaName: string) => {
+  const result = await sequelize.query(
+    `SELECT schema_name FROM information_schema.schemata WHERE schema_name = :schemaName;`,
+    { replacements: { schemaName }, type: QueryTypes.SELECT }
+  );
+  return result.length > 0;
 };
 
 export const deleteTenantSchema = async (tenantId: string) => {

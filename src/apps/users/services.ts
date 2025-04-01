@@ -105,25 +105,18 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
   await createTenantSchema(tenantIdIfNone);
 
-  const TenantCompany = getTenantModel(Company, tenantIdIfNone);
   const TenantUser = getTenantModel(User, tenantIdIfNone);
 
-  TenantCompany.hasMany(TenantUser, {
-    foreignKey: { name: "tenantId", allowNull: false },
-    as: tenantIdIfNone + "-users",
-    onDelete: "CASCADE",
-  });
-  TenantUser.belongsTo(TenantCompany, {
+  TenantUser.belongsTo(Company, {
     foreignKey: { name: "tenantId", allowNull: false },
     as: tenantIdIfNone + "-company",
   });
 
-  await TenantCompany.sync({ alter: true });
   await TenantUser.sync({ alter: true });
 
   try {
     return await withTransaction(async (transaction) => {
-      const company = await TenantCompany.create(
+      const company = await Company.create(
         {
           id: tenantIdIfNone,
           name: tenantIdIfNone,
@@ -132,7 +125,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         },
         { transaction }
       );
-      console.log({ name: userData.name });
+      if (!company) throw new Error("Company creation failed");
 
       const newUser = await TenantUser.create(
         {
@@ -176,7 +169,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   } catch (error) {
     debugLog("Deleting tenant schema", error);
     await deleteTenantSchema(tenantIdIfNone);
-    throw new Error("An error occurred while creating your Organization");
+    throw error;
   }
 };
 

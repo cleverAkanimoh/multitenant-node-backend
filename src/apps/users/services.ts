@@ -7,7 +7,10 @@ import {
 import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
-import { hashPassword } from "../authentication/services";
+import {
+  hashPassword,
+  sendAccountVerificationEmail,
+} from "../authentication/services";
 import GlobalUser from "../shared/models";
 import User, { Roles, UserCreationAttributes } from "./models/user";
 
@@ -91,7 +94,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   const hashedPassword = await hashPassword(userData.password);
 
   if (isSuperAdmin && userData.tenantId) {
-    const superAdminExists = await User.findOne({
+    const superAdminExists = await GlobalUser.findOne({
       where: { tenantId: userData.tenantId },
     });
 
@@ -120,32 +123,37 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
   try {
     return await withTransaction(async (transaction) => {
-      const company = (await TenantCompany.create(
+      const company = await TenantCompany.create(
         {
           id: tenantIdIfNone,
+          name: tenantIdIfNone,
           email: userData.email,
           phoneNumber: userData.phoneNumber,
         },
         { transaction }
-      )) as Company;
+      );
+      console.log({ userData });
 
-      // Then create the superadmin user
-      const newUser = (await TenantUser.create(
+      const newUser = await TenantUser.create(
         {
           ...userData,
           email: userData.email.toLowerCase(),
           password: hashedPassword,
-          tenantId: tenantIdIfNone,
+          tenantId: company.id,
           userRole: Roles.SUPERADMIN,
           isActive: false,
           isStaff: true,
         },
         { transaction }
-      )) as User;
+      );
+
+      console.log({ name: newUser.name });
 
       // Update the company record with the new user's ID as ownerId
       company.ownerId = newUser.id;
       await company.save({ transaction });
+
+      console.log({ owner: company.ownerId });
 
       const gUser = await GlobalUser.create(
         {
@@ -153,18 +161,20 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
           email: newUser.email,
           name: newUser.name,
           password: hashedPassword,
-          tenantId: tenantIdIfNone,
+          tenantId: newUser.tenantId,
           userRole: newUser.userRole,
         },
         { transaction }
       );
 
-      // await sendAccountVerificationEmail(gUser);
+      console.log({ gUser: gUser.name });
+
+      await sendAccountVerificationEmail(gUser);
 
       return newUser;
     });
   } catch (error) {
-    debugLog("Deleting tenant schema");
+    debugLog("Deleting tenant schema", error);
     await deleteTenantSchema(tenantIdIfNone);
     throw error;
   }

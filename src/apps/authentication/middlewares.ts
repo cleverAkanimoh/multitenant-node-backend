@@ -3,6 +3,7 @@ import Company from "../(dashboard)/company/models";
 import { getTenantModel } from "../../core/multitenancy";
 import { customResponse } from "../../utils/customResponse";
 import { debugLog } from "../../utils/debugLog";
+import { findGlobalUserById } from "../shared/services";
 import User from "../users/models/user";
 import { verifyJwtToken } from "./services";
 
@@ -29,9 +30,13 @@ export const authenticate = async (
   try {
     const decoded = verifyJwtToken(token);
 
+    const gUser = await findGlobalUserById(decoded.userId);
+
+    if (!gUser) throw new Error("Invalid token or expired token");
+
     const TenantUser = getTenantModel(User, decoded.tenantId);
 
-    const user = TenantUser.findByPk(decoded.userId);
+    const user = await TenantUser.findByPk(decoded.userId);
 
     req.user = user;
     req.company = decoded.tenantId;
@@ -39,7 +44,7 @@ export const authenticate = async (
     req.tenantCompanyModel = getTenantModel(Company, decoded.tenantId);
     next();
   } catch (error) {
-    debugLog(error);
+    debugLog("Authenticate middleware ", error);
 
     return res.status(401).json(
       customResponse({

@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
+import * as XLSX from "xlsx";
 import { getTenantModel } from "../../../core/multitenancy";
 import {
   handleNotFound,
   handleRequests,
   handleValidationError,
 } from "../../../utils/handleRequests";
+import { findGlobalUserById } from "../services";
 
 /**
  * @swagger
@@ -35,7 +37,9 @@ class ModelViewSet<T extends Model> {
    *         description: Record not found
    */
   current = async (req: Request, res: Response) => {
-    console.log(req.company);
+    console.log({ tenantId: req.company });
+
+    
 
     const TenantModel = getTenantModel(this.model, req.company);
 
@@ -46,6 +50,20 @@ class ModelViewSet<T extends Model> {
     });
   };
 
+  getRequestBodySchema() {
+    if (this.schema) {
+      return {
+        required: true,
+        content: {
+          "application/json": {
+            schema: joiToSwagger(this.schema),
+          },
+        },
+      };
+    }
+    return undefined;
+  }
+
   /**
    * @swagger
    * /create:
@@ -53,11 +71,7 @@ class ModelViewSet<T extends Model> {
    *     summary: Create a new record
    *     tags: [ModelViewSet]
    *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
+   *       $ref: '#/components/requestBodies/CreateRequestBody'
    *     responses:
    *       201:
    *         description: Successfully created a new record
@@ -168,16 +182,10 @@ class ModelViewSet<T extends Model> {
    *           type: string
    *         description: Record ID
    *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
+   *       $ref: '#/components/requestBodies/UpdateRequestBody'
    *     responses:
    *       200:
    *         description: Successfully updated the record
-   *       404:
-   *         description: Record not found
    *       400:
    *         description: Validation error
    */
@@ -205,7 +213,65 @@ class ModelViewSet<T extends Model> {
 
   /**
    * @swagger
-   * /destroy/{id}:
+   * /bulk-upload:
+   *   post:
+   *     summary: Bulk upload records from an Excel file
+   *     tags: [ModelViewSet]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               file:
+   *                 type: string
+   *                 format: binary
+   *                 description: Excel file to upload
+   *     responses:
+   *       201:
+   *         description: Successfully uploaded records
+   *       400:
+   *         description: Validation error or invalid file format
+   */
+  bulkUpload = async (req: Request, res: Response) => {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    try {
+      const workbook = XLSX.read(file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(sheet);
+
+      if (this.schema) {
+        for (const record of data) {
+          const { error } = this.schema.validate(record);
+          if (error) {
+            return handleValidationError(res, error);
+          }
+        }
+      }
+
+      await handleRequests({
+        promise: this.model.bulkCreate(data as any),
+        message: `${this.model.name || ""} records uploaded successfully`,
+        res,
+        statusCode: 201,
+      });
+    } catch (error) {
+      res
+        .status(400)
+        .json({ message: "Invalid file format or processing error", error });
+    }
+  };
+
+  /**
+   * @swagger
+   * /delete/{id}:
    *   delete:
    *     summary: Delete a record by ID
    *     tags: [ModelViewSet]
@@ -238,6 +304,65 @@ class ModelViewSet<T extends Model> {
       },
     });
   };
+}
+
+function joiToSwagger(schema: any) {
+  const swaggerSchema = schema.describe();
+  const convert = (joiDesc: any): any => {
+    const typeMap: Record<string, string> = {
+      string: "string",
+      number: "number",
+      boolean: "boolean",
+      array: "array",
+      object: "object",
+      date: "string",
+    };
+
+    const swaggerType = typeMap[joiDesc.type];
+    if (!swaggerType) {
+      throw new Error(`Unsupported Joi type: ${joiDesc.type}`);
+    }
+
+    const result: any = { type: swaggerType };
+
+    if (joiDesc.flags?.presence === "required") {
+      result.required = true;
+    }
+
+    if (joiDesc.rules) {
+      for (const rule of joiDesc.rules) {
+        if (rule.name === "min") {
+          result.minLength = rule.args.limit;
+        } else if (rule.name === "max") {
+          result.maxLength = rule.args.limit;
+        } else if (rule.name === "pattern") {
+          result.pattern = rule.args.regex.toString();
+        }
+      }
+    }
+
+    if (swaggerType === "array" && joiDesc.items) {
+      result.items = convert(joiDesc.items[0]);
+    }
+
+    if (swaggerType === "object" && joiDesc.keys) {
+      result.properties = {};
+      result.required = [];
+      for (const [key, value] of Object.entries(joiDesc.keys)) {
+        result.properties[key] = convert(value);
+        if ((value as any).flags?.presence === "required") {
+          result.required.push(key);
+        }
+      }
+      if (result.required.length === 0) {
+        delete result.required;
+      }
+    }
+
+    return result;
+  };
+
+  return convert(swaggerSchema);
 }
 
 export default ModelViewSet;

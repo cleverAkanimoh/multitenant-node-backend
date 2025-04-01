@@ -4,12 +4,12 @@ import express from "express";
 
 import { createServer } from "http";
 import corsSetup from "./core/corsSetup";
+import { syncTenantSchemas } from "./core/multitenancy";
 import sequelize from "./core/orm";
 import { setupWebSocketServer } from "./core/websocket";
 import { configureMiddleware } from "./middlewares";
 import { configAppRoutes } from "./routes";
 import { debugLog } from "./utils/debugLog";
-import { syncTenantSchemas } from "./core/multitenancy";
 
 dotenv.config();
 
@@ -42,7 +42,7 @@ const PORT = process.env.PORT;
       alter: true,
       // force: true, // process.env.NODE_ENV === "development"
     });
-    debugLog("✅ All models synchronized.");
+    debugLog("✅ Public schema synchronized.");
 
     // Sync tenant schemas
     await syncTenantSchemas();

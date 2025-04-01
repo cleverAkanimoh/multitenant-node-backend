@@ -1,6 +1,5 @@
 import { Response } from "express";
 import { customResponse } from "./customResponse";
-import { debugLog } from "./debugLog";
 
 interface HandleRequestsParams<T> {
   promise: Promise<T>;
@@ -34,7 +33,7 @@ export async function handleRequests<T>({
       );
     }
   } catch (error) {
-    debugLog("Error sending request ", error);
+    // debugLog("Error sending request ", error);
 
     if (!res.headersSent) {
       return res.status(500).json(

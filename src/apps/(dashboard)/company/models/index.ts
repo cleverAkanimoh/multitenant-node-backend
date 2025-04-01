@@ -25,7 +25,7 @@ export interface CompanyAttributes {
   workDays?: string[];
   workTimeRange?: { start: string; end: string };
   breakTimeRange?: { start: string; end: string };
-  structureLevel?: StructureLevel;
+  structureLevel?: string[];
   ownerId?: string;
 }
 
@@ -50,7 +50,7 @@ class Company
   public workDays?: string[];
   public workTimeRange?: { start: string; end: string };
   public breakTimeRange?: { start: string; end: string };
-  public structureLevel?: StructureLevel;
+  public structureLevel?: string[];
   public ownerId?: string;
 
   public readonly createdAt!: Date;
@@ -114,8 +114,7 @@ Company.init(
       allowNull: true,
     },
     structureLevel: {
-      type: DataTypes.ENUM,
-      values: Object.values(StructureLevel),
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
     ownerId: {

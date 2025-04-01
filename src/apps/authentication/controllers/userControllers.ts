@@ -92,7 +92,10 @@ import {
  *       500:
  *         description: Internal Server Error
  */
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   const { error } = userSchema.validate(req.body);
   if (error) return handleValidationError(res, error);
 

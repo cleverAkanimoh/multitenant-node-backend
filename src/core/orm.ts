@@ -12,7 +12,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
         : false,
   },
   logging: false,
-  schema: "public",
+  define: { schema: "public" },
 });
 
 export default sequelize;

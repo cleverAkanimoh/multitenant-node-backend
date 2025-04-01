@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { frontendUrl } from "../../core/configs";
 import { TToken } from "../../types/token";
 import { customSendMail } from "../../utils/customSendMail";
-import { debugLog } from "../../utils/debugLog";
 import { generateEmailTemplate } from "../../utils/generateEmailTemplate";
 import User from "../users/models/user";
 import { cleanUserData } from "../users/services";
@@ -33,7 +32,6 @@ export const sendAccountVerificationEmail = async (
 
   const activationLink = `${frontendUrl}/verify-account?token=${activationToken}`;
   const cleanData = await cleanUserData(user);
-  debugLog({ user, cleanData, activationLink });
 
   const html = generateEmailTemplate({
     title: newUser ? "Welcome to E-Metrics Suite!" : "Verify your account",

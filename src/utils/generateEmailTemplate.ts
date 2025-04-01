@@ -21,10 +21,10 @@ export const generateEmailTemplate = ({
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${brandName}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts are not supported in many email clients, so fallback fonts will be used -->
     <style>
       body {
-        font-family: 'Poppins', Arial, sans-serif;
+        font-family: Arial, sans-serif;
         padding: 20px;
         background-color: #f4f4f4;
         color: #333;
@@ -39,6 +39,8 @@ export const generateEmailTemplate = ({
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .header {
+      display:flex;
+        gap:4px;
         background-color: #0b3178;
         padding: 20px;
         text-align: center;
@@ -70,11 +72,12 @@ export const generateEmailTemplate = ({
         display: inline-block;
         padding: 12px 24px;
         font-size: 16px;
-        color: #ffffff;
-        background-color: #0b3178;
-        text-decoration: none;
-        border-radius: 5px;
-        font-weight: bold;
+        color: #ffffff !important;
+        background-color: #0b3178 !important;
+        text-decoration: none !important;
+        border-radius: 5px !important;
+        font-weight: bold !important;
+        text-align: center !important;
       }
       .content .note {
         font-size: 14px;
@@ -116,13 +119,15 @@ export const generateEmailTemplate = ({
   <body>
     <div class="container">
       <div class="header">
-        <img src="https://via.placeholder.com/150x50?text=${brandName}" alt="Brand Logo" />
+        <img src="https://via.placeholder.com/150x50?text=${brandName}" alt="${brandName}" />
         <h1>${brandName}</h1>
       </div>
       <div class="content">
         <h2>${title}</h2>
         <p>${message}</p>
-        <a href="${buttonLink}">${buttonText}</a>
+        <a href="${buttonLink}">${buttonText}</a> <br />
+        <a href="${buttonLink}">${buttonLink}</a>
+        
         <p class="note">If you didn't request this, please ignore this email.</p>
       </div>
       <div class="footer">

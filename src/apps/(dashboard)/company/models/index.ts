@@ -137,6 +137,7 @@ Company.hasMany(User, {
   },
   as: "users",
   onDelete: "CASCADE",
+  onUpdate: "CASCADE",
 });
 
 User.belongsTo(Company, {

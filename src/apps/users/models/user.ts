@@ -94,7 +94,7 @@ User.init(
     },
     isMfaEnabled: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
     },
     tenantId: {
       type: DataTypes.STRING,

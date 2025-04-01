@@ -21,11 +21,7 @@ export const findUserByEmail = async (email: string) => {
   return User.findOne({ where: { email } });
 };
 
-export const cleanUserData = async (gUser: User) => {
-  const TenantUser = getTenantModel(User, gUser.tenantId);
-
-  const user = await TenantUser.findByPk(gUser.id);
-
+export const cleanUserData = async (user: User) => {
   const [firstName, lastName] = user.name.split(" ");
   const isSuperAdmin = user.userRole === Roles.SUPERADMIN;
   const isHr = user.userRole === Roles.ADMIN;
@@ -126,12 +122,14 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
       );
       if (!company) throw new Error("Company creation failed");
 
+      console.log({ company });
+
       const newUser = await TenantUser.create(
         {
           ...userData,
           email: userData.email.toLowerCase(),
           password: hashedPassword,
-          tenantId: company.id,
+          tenantId: tenantIdIfNone,
           userRole: Roles.SUPERADMIN,
           isActive: false,
           isStaff: true,
@@ -144,7 +142,13 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
       const user = await User.create(
         {
-          ...newUser,
+          ...userData,
+          email: userData.email.toLowerCase(),
+          password: hashedPassword,
+          tenantId: tenantIdIfNone,
+          userRole: Roles.SUPERADMIN,
+          isActive: false,
+          isStaff: true,
           id: newUser.id,
         },
         { transaction }

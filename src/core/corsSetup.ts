@@ -7,7 +7,7 @@ dotenv.config();
 
 const corsSetup = (app: Express) => {
   const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
-
+debugLog({ allowedOrigins });
   app.use(
     cors({
       origin: allowedOrigins,

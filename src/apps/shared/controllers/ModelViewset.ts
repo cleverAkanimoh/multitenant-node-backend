@@ -17,10 +17,19 @@ import {
 class ModelViewSet<T extends Model> {
   private model: ModelStatic<T>;
   private schema?: any;
+  private name?: string;
+  private isGlobal?: boolean;
 
-  constructor(model: ModelStatic<T>, schema?: any) {
+  constructor(
+    model: ModelStatic<T>,
+    schema?: any,
+    name?: string,
+    isGlobal?: boolean
+  ) {
     this.model = model;
     this.schema = schema;
+    this.name = name;
+    this.isGlobal = isGlobal;
   }
 
   /**

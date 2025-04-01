@@ -54,7 +54,7 @@ const CompanyController = new ModelViewSet({
   model: Company,
   schema: companySchema,
   name: "Organization",
-  isGlobal: true,
+  isTenantModel: false,
 });
 
 export default CompanyController;

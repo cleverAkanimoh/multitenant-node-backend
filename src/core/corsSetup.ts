@@ -6,14 +6,11 @@ import { debugLog } from "../utils/debugLog";
 dotenv.config();
 
 const corsSetup = (app: Express) => {
+  const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
+
   app.use(
     cors({
-      origin: [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "http://167.99.237.171:8080",
-      ],
+      origin: allowedOrigins,
       optionsSuccessStatus: 200,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization", "x-tenant"],

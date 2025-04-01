@@ -68,7 +68,7 @@ export const generateEmailTemplate = ({
         line-height: 1.5;
         margin-bottom: 20px;
       }
-      .content a {
+      .buttonLink {
         display: inline-block;
         padding: 12px 24px;
         font-size: 16px;
@@ -125,7 +125,7 @@ export const generateEmailTemplate = ({
       <div class="content">
         <h2>${title}</h2>
         <p>${message}</p>
-        <a href="${buttonLink}">${buttonText}</a> <br />
+        <a href="${buttonLink}" class="buttonLink">${buttonText}</a> <br />
         <a href="${buttonLink}">${buttonLink}</a>
         
         <p class="note">If you didn't request this, please ignore this email.</p>

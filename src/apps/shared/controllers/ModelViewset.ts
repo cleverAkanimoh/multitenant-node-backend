@@ -71,18 +71,24 @@ class ModelViewSet<T extends Model> {
         });
 
         if (existingRecord) {
-          return res.status(400).json({
-            message: `${
-              req.body.name || this.name || TenantModel.name || ""
-            } with the same name already exists`,
-          });
+          return res.status(400).json(
+            customResponse({
+              statusCode: 400,
+              message: `${req.body.name} ${
+                this.name?.toLowerCase() ||
+                TenantModel.name?.toLowerCase() ||
+                ""
+              } already exists`,
+              data: existingRecord,
+            })
+          );
         }
       }
 
       return await handleRequests({
         promise: TenantModel.create(req.body, { transaction }),
-        message: `${
-          req.body.name || this.name || TenantModel.name || ""
+        message: `${req.body.name || ""} ${
+          this.name || TenantModel.name || ""
         } created successfully`,
         res,
         statusCode: 201,
@@ -102,7 +108,7 @@ class ModelViewSet<T extends Model> {
 
     await handleRequests({
       promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
-      message: `${this.name || TenantModel.name || ""}s retrieved successfully`,
+      message: null,
       res,
       resData: (data: any) => {
         const totalPages = Math.ceil(data.count / limitValue);
@@ -230,23 +236,26 @@ class ModelViewSet<T extends Model> {
   destroy = async (req: Request, res: Response) => {
     const { id } = req.params;
 
+    const TenantModel = this.isTenantModel
+      ? getTenantModel(this.model, req.company)
+      : this.model;
+
     await withTransaction(async (transaction) => {
       await handleRequests({
-        promise: this.model.destroy({ where: { id: id as any }, transaction }),
-        message: `${this.name || this.model.name || ""} deleted successfully`,
+        promise: TenantModel.destroy({ where: { id: id as any }, transaction }),
+        message: `${this.name || TenantModel.name || ""} deleted successfully`,
         res,
-        callback: undefined,
         resData: (deleted) => {
           if (!deleted) {
             handleNotFound({
               res,
-              message: `${this.name || this.model.name || ""} not found`,
+              message: `${this.name || TenantModel.name || ""} not found`,
             });
             return null;
           }
           return {
             message: `${
-              this.name || this.model.name || ""
+              this.name || TenantModel.name || ""
             } deleted successfully`,
           };
         },

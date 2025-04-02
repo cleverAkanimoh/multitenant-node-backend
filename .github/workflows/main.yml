@@ -19,36 +19,33 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRI_KEY }}
           port: 22
-      - name: Debug user and home directory
-        run: |
+          script: |
             echo "Current user: $(whoami)"
             echo "Home directory: $HOME"
             echo "Current directory: $(pwd)"
             echo "Shell: $SHELL"
             echo "PATH: $PATH"
-          script: |
-            echo "This is the user: $(whoami)"
-            pwd
+
             echo "Changing directory to the app folder"
-            cd /var/www/emnd/
+            cd /var/www/emnd/ || exit 1
 
             echo "Pulling latest changes from remote"
-            git pull
+            git pull || exit 1
 
             echo "Checking out staging branch"
-            git checkout staging
+            git checkout staging || exit 1
             
             echo "Pulling latest updates from remote"
-            git pull origin staging
+            git pull origin staging || exit 1
             
             echo "Installing dependencies"
-            yarn install
+            yarn install || exit 1
             
             echo "Building the app"
-            yarn build
+            yarn build || exit 1
             
             echo "Reloading the app with PM2"
-            pm2 reload my-app
+            pm2 reload my-app || exit 1
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
@@ -59,25 +56,29 @@ jobs:
           key: ${{ secrets.SSH_PRI_KEY }}
           port: 22
           script: |
-            echo "This is the user: $(whoami)"
-            pwd
+            echo "Current user: $(whoami)"
+            echo "Home directory: $HOME"
+            echo "Current directory: $(pwd)"
+            echo "Shell: $SHELL"
+            echo "PATH: $PATH"
+
             echo "Changing directory to the app folder"
-            cd /var/www/emnd/
+            cd /var/www/emnd/ || exit 1
 
             echo "Pulling latest changes from remote"
-            git pull
+            git pull || exit 1
 
             echo "Checking out main branch"
-            git checkout main
+            git checkout main || exit 1
             
             echo "Pulling latest updates from remote"
-            git pull origin main
+            git pull origin main || exit 1
             
             echo "Installing dependencies"
-            yarn install
+            yarn install || exit 1
             
             echo "Building the app"
-            yarn build
+            yarn build || exit 1
             
             echo "Reloading the app with PM2"
-            pm2 reload my-app
+            pm2 reload my-app || exit 1

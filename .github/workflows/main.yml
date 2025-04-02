@@ -1,63 +1,42 @@
-name: Deploy
+- name: Deploy to Staging
+  if: github.ref == 'refs/heads/staging'
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.STAGING_HOST }}
+    username: ${{ secrets.USER }}
+    key: ${{ secrets.SSH_PRI_KEY }}
+    port: 22
+    script: |
+      # Manually source the nvm script to ensure node and yarn are available
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-on:
-  push:
-    branches:
-      - staging   # Staging branch for staging environment
-      - main      # Main branch for production environment
+      # Optionally, add yarn and pm2 to PATH if they are installed globally
+      export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [staging, production]
-    steps:
-      - name: Deploy to ${{ matrix.environment }}
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ matrix.environment == 'staging' && secrets.STAGING_HOST || secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRI_KEY }}
-          port: 22
-          script: |
-            echo "Starting deployment for '${{ matrix.environment }}' environment"
-            echo "Current user: $(whoami)"
-            echo "Home directory: $HOME"
-            echo "Current directory: $(pwd)"
-            echo "Shell: $SHELL"
-            echo "PATH: $PATH"
+      echo "Current user: $(whoami)"
+      echo "Home directory: $HOME"
+      echo "Current directory: $(pwd)"
+      echo "Shell: $SHELL"
+      echo "PATH: $PATH"
 
-            # Change to app directory
-            cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
+      echo "Changing directory to the app folder"
+      cd /var/www/emnd/ || exit 1
 
-            # Pull latest changes and checkout the proper branch
-            echo "Pulling latest changes from remote"
-            git pull || { echo "git pull failed"; exit 1; }
+      echo "Pulling latest changes from remote"
+      git pull || exit 1
 
-            if [ "${{ matrix.environment }}" = "staging" ]; then
-              echo "Checking out staging branch"
-              git checkout staging || { echo "Failed to checkout staging"; exit 1; }
-              echo "Pulling latest updates from remote (staging)"
-              git pull origin staging || { echo "git pull origin staging failed"; exit 1; }
-            else
-              echo "Checking out main branch"
-              git checkout main || { echo "Failed to checkout main"; exit 1; }
-              echo "Pulling latest updates from remote (main)"
-              git pull origin main || { echo "git pull origin main failed"; exit 1; }
-            fi
-
-            # Install dependencies
-            echo "Installing dependencies"
-            which yarn
-            yarn install || { echo "yarn install failed"; exit 1; }
-
-            # Build the app
-            echo "Building the app"
-            which yarn
-            yarn build || { echo "yarn build failed"; exit 1; }
-
-            # Reload the app with PM2
-            echo "Reloading the app with PM2"
-            which pm2
-            pm2 reload my-app || { echo "pm2 reload failed"; exit 1; }
+      echo "Checking out staging branch"
+      git checkout staging || exit 1
+      
+      echo "Pulling latest updates from remote"
+      git pull origin staging || exit 1
+      
+      echo "Installing dependencies"
+      yarn install || { echo "yarn install failed"; exit 1; }
+      
+      echo "Building the app"
+      yarn build || { echo "yarn build failed"; exit 1; }
+      
+      echo "Reloading the app with PM2"
+      pm2 reload my-app || { echo "pm2 reload failed"; exit 1; }

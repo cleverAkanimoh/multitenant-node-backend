@@ -14,31 +14,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "DEPLOY_HOST=${{ secrets.HOST }}" >> $GITHUB_ENV
+            echo "BRANCH=main" >> $GITHUB_ENV
+            echo "USE_NVM=true" >> $GITHUB_ENV  # Production uses NVM
+          else
+            echo "DEPLOY_HOST=${{ secrets.STAGING_HOST }}" >> $GITHUB_ENV
+            echo "BRANCH=staging" >> $GITHUB_ENV
+            echo "USE_NVM=false" >> $GITHUB_ENV  # Staging uses global Node.js
+          fi
+
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRI_KEY }}
           script: |
             cd /var/www/emnd/
-            
-            # Load NVM and set PATH correctly
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-            export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
 
-            # Detect the branch and switch accordingly
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-              BRANCH="main"
+            # Use NVM only for production
+            if [ "$USE_NVM" == "true" ]; then
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+              [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+              export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
             else
-              BRANCH="staging"
+              export PATH="/usr/bin:$PATH"  # Use system-installed Node.js on staging
             fi
 
-            echo "Deploying to $BRANCH branch..."
+            # Debug: Check which versions are being used
+            echo "Node.js: $(which node)"
+            echo "Yarn: $(which yarn)"
+            echo "PM2: $(which pm2)"
 
-            # Switch to the correct branch and pull updates
+            echo "Deploying to $BRANCH branch on $DEPLOY_HOST"
+
+            # Checkout the correct branch and pull latest code
             git checkout $BRANCH
             git pull origin $BRANCH
 

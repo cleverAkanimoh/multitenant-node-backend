@@ -65,7 +65,6 @@ class ModelViewSet<T extends Model> {
       : this.model;
 
     return await withTransaction(async (transaction) => {
-
       if (req.body.name) {
         const existingRecord = await TenantModel.findOne({
           where: { name: req.body.name.toLowerCase() },
@@ -73,14 +72,18 @@ class ModelViewSet<T extends Model> {
 
         if (existingRecord) {
           return res.status(400).json({
-            message: `${this.name || TenantModel.name || ""} with the same name already exists`,
+            message: `${
+              req.body.name || this.name || TenantModel.name || ""
+            } with the same name already exists`,
           });
         }
       }
 
       return await handleRequests({
         promise: TenantModel.create(req.body, { transaction }),
-        message: `${this.name || TenantModel.name || ""} created successfully`,
+        message: `${
+          req.body.name || this.name || TenantModel.name || ""
+        } created successfully`,
         res,
         statusCode: 201,
       });
@@ -151,9 +154,9 @@ class ModelViewSet<T extends Model> {
       throw new Error("No id found in request param");
     }
 
-        const TenantModel = this.isTenantModel
-          ? getTenantModel(this.model, req.company)
-          : this.model;
+    const TenantModel = this.isTenantModel
+      ? getTenantModel(this.model, req.company)
+      : this.model;
 
     await withTransaction(async (transaction) => {
       await handleRequests({

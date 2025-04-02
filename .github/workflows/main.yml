@@ -20,6 +20,7 @@ jobs:
           key: ${{ secrets.SSH_PRI_KEY }}
           port: 22
           script: |
+            echo "This is the user: $(whoami)"
             echo "Changing directory to the app folder"
             cd /var/www/emnd/
 
@@ -50,6 +51,7 @@ jobs:
           key: ${{ secrets.SSH_PRI_KEY }}
           port: 22
           script: |
+            echo "This is the user: $(whoami)"
             echo "Changing directory to the app folder"
             cd /var/www/emnd/
 

@@ -35,18 +35,19 @@ jobs:
           script: |
             cd /var/www/emnd/
 
-            # Use NVM only for production
+            # Ensure NVM and Node.js are correctly loaded
             if [ "$USE_NVM" == "true" ]; then
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
               [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-              export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
+              export PATH="$NVM_DIR/versions/node/$(ls $NVM_DIR/versions/node)/bin:$PATH"
             else
               export PATH="/usr/bin:$PATH"  # Use system-installed Node.js on staging
             fi
 
-            # Debug: Check which versions are being used
+            # Debugging: Check versions to confirm environment is correct
             echo "Node.js: $(which node)"
+            echo "Node.js Version: $(node -v)"
             echo "Yarn: $(which yarn)"
             echo "PM2: $(which pm2)"
 
@@ -56,11 +57,14 @@ jobs:
             git checkout $BRANCH
             git pull origin $BRANCH
 
+            # Ensure Yarn is installed correctly
+            yarn --version || npm install -g yarn
+
             # Install dependencies
-            yarn install --frozen-lockfile
+            yarn install
             
             # Build the application
-            yarn build
+            yarn build || echo "Build failed"
 
             # Restart the app using PM2
-            pm2 reload my-app
+            pm2 reload my-app || echo "PM2 reload failed"

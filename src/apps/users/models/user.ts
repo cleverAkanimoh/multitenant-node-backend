@@ -6,6 +6,8 @@ export enum Roles {
   STAFF = "employee",
   ADMIN = "hr",
   SUPERADMIN = "employer",
+  TEAMLEAD = "team lead",
+  
 }
 
 export interface UserAttributes {

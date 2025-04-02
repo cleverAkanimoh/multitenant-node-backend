@@ -27,6 +27,8 @@ export const cleanUserData = async (user: User) => {
   const isHr = user.userRole === Roles.ADMIN;
   const isStaff = user.userRole === Roles.STAFF;
 
+  const company = await Company.findByPk(user.tenantId);
+
   const cleanData = {
     id: user.id,
     name: user.name,
@@ -36,10 +38,20 @@ export const cleanUserData = async (user: User) => {
     role: user.userRole,
     tenantId: user.tenantId,
     email: user.email,
+    userType: user.userRole,
     isSuperAdmin,
     isHr,
     isStaff,
-    hasCompletedCompanyProfile: user.isNewRecord,
+    hasCompletedCompanyProfile:
+      isSuperAdmin &&
+      Boolean(
+        company?.name &&
+          company?.shortName &&
+          company?.breakTimeRange &&
+          company?.primaryTimezone &&
+          company?.workTimeRange &&
+          company?.workDays
+      ),
     isNewUser: user.isNewRecord,
   };
   return cleanData;

@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - staging   # Staging branch for staging environment
+      - main      # Main branch for production environment
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Staging
+        if: github.ref == 'refs/heads/staging'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRI_KEY }}
+          port: 22
+          script: |
+            echo "Changing directory to the app folder"
+            cd /var/www/emnd/
+
+            echo "Pulling latest changes from remote"
+            git pull
+
+            echo "Checking out staging branch"
+            git checkout staging
+            
+            echo "Pulling latest updates from remote"
+            git pull origin staging
+            
+            echo "Installing dependencies"
+            yarn install
+            
+            echo "Building the app"
+            yarn build
+            
+            echo "Reloading the app with PM2"
+            pm2 reload my-app
+
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRI_KEY }}
+          port: 22
+          script: |
+            echo "Changing directory to the app folder"
+            cd /var/www/emnd/
+
+            echo "Pulling latest changes from remote"
+            git pull
+
+            echo "Checking out main branch"
+            git checkout main
+            
+            echo "Pulling latest updates from remote"
+            git pull origin main
+            
+            echo "Installing dependencies"
+            yarn install
+            
+            echo "Building the app"
+            yarn build
+            
+            echo "Reloading the app with PM2"
+            pm2 reload my-app

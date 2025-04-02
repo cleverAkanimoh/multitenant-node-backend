@@ -316,13 +316,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const user = req.user;
-      if (!user) throw new Error("User not found");
 
-      return user;
+      return cleanUserData(user as User);
     })(),
     message: null,
     res,
-    resData: (user) => cleanUserData(user as User),
   });
 };
 

@@ -9,6 +9,12 @@ const storage = multer.diskStorage({
     fs.mkdirSync(uploadPath, { recursive: true });
 
     cb(null, uploadPath);
+
+    //  fs.unlink(uploadPath, (err) => {
+    //    if (err) {
+    //      console.error(`Failed to delete file: ${uploadPath}`, err);
+    //    }
+    //  });
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);

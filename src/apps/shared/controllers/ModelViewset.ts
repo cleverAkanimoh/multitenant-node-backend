@@ -88,13 +88,19 @@ class ModelViewSet<T extends Model> {
       promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
       message: `${this.name || TenantModel.name || ""}s retrieved successfully`,
       res,
-      resData: (data: any) => ({
-        total: data.count,
-        page: Number(page),
+      resData: (data: any) => {
+      const totalPages = Math.ceil(data.count / limitValue);
+      const currentPage = Number(page);
+      return {
+        count: data.count,
+        page: currentPage,
         perPage: limitValue,
-        totalPages: Math.ceil(data.count / limitValue),
+        totalPages,
+        nextPage: currentPage < totalPages ? currentPage + 1 : null,
+        previousPage: currentPage > 1 ? currentPage - 1 : null,
         data: data.rows,
-      }),
+      };
+      },
     });
   };
 

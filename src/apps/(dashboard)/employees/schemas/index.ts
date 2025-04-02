@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const PeopleSchema = Joi.object({
+export const PeopleSchema = Joi.object({
   firstName: Joi.string().min(1).max(255).required(),
   lastName: Joi.string().min(1).max(255).required(),
   phoneNumber: Joi.string()
@@ -41,56 +41,3 @@ const PeopleSchema = Joi.object({
   careerLevel: Joi.string().min(1).max(255).required(),
   designationName: Joi.string().min(1).max(255).required(),
 });
-
-const validatePeople = (peopleData: any) => {
-  const { error, value } = PeopleSchema.validate(peopleData);
-  if (error) {
-    console.log("Validation Error:", error.details);
-    return false;
-  } else {
-    console.log("Valid People Data:", value);
-    return true;
-  }
-};
-
-const peopleData = {
-  firstname: "",
-  lastname: "",
-  phone_number: "",
-  official_email: "",
-  personal_phone: "",
-  personal_email: "",
-  address: "",
-  date_of_birth: "",
-  education: {
-    institutions: ["", ""],
-    years: ["", ""],
-    qualifications: ["", ""],
-  },
-  guarantor1: {
-    firstname: "",
-    lastname: "",
-    address: "",
-    occupation: "",
-    age: 40,
-  },
-  guarantor2: {
-    firstname: "",
-    lastname: "",
-    address: "",
-    occupation: "",
-    age: 35,
-  },
-  description: "",
-  role: "",
-  date_employed: "",
-  corporate_name: "",
-  division_name: "",
-  group_name: "",
-  department_name: "",
-  unit_name: "",
-  career_level: "",
-  designation_name: "",
-};
-
-validatePeople(peopleData);

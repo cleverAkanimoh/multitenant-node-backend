@@ -19,6 +19,13 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRI_KEY }}
           port: 22
+      - name: Debug user and home directory
+          run: |
+            echo "Current user: $(whoami)"
+            echo "Home directory: $HOME"
+            echo "Current directory: $(pwd)"
+            echo "Shell: $SHELL"
+            echo "PATH: $PATH"
           script: |
             echo "This is the user: $(whoami)"
             pwd

@@ -65,6 +65,19 @@ class ModelViewSet<T extends Model> {
       : this.model;
 
     return await withTransaction(async (transaction) => {
+
+      if (req.body.name) {
+        const existingRecord = await TenantModel.findOne({
+          where: { name: req.body.name.toLowerCase() },
+        });
+
+        if (existingRecord) {
+          return res.status(400).json({
+            message: `${this.name || TenantModel.name || ""} with the same name already exists`,
+          });
+        }
+      }
+
       return await handleRequests({
         promise: TenantModel.create(req.body, { transaction }),
         message: `${this.name || TenantModel.name || ""} created successfully`,
@@ -89,17 +102,17 @@ class ModelViewSet<T extends Model> {
       message: `${this.name || TenantModel.name || ""}s retrieved successfully`,
       res,
       resData: (data: any) => {
-      const totalPages = Math.ceil(data.count / limitValue);
-      const currentPage = Number(page);
-      return {
-        count: data.count,
-        page: currentPage,
-        perPage: limitValue,
-        totalPages,
-        nextPage: currentPage < totalPages ? currentPage + 1 : null,
-        previousPage: currentPage > 1 ? currentPage - 1 : null,
-        data: data.rows,
-      };
+        const totalPages = Math.ceil(data.count / limitValue);
+        const currentPage = Number(page);
+        return {
+          count: data.count,
+          page: currentPage,
+          perPage: limitValue,
+          totalPages,
+          nextPage: currentPage < totalPages ? currentPage + 1 : null,
+          previousPage: currentPage > 1 ? currentPage - 1 : null,
+          data: data.rows,
+        };
       },
     });
   };
@@ -138,16 +151,20 @@ class ModelViewSet<T extends Model> {
       throw new Error("No id found in request param");
     }
 
+        const TenantModel = this.isTenantModel
+          ? getTenantModel(this.model, req.company)
+          : this.model;
+
     await withTransaction(async (transaction) => {
       await handleRequests({
-        promise: this.model.update(req.body, {
+        promise: TenantModel.update(req.body, {
           where: { id: id as any },
           transaction,
         }),
         message: `${this.name || this.model.name || ""} updated successfully`,
         res,
         callback: async () => {
-          const updatedRecord = await this.model.findByPk(id, { transaction });
+          const updatedRecord = await TenantModel.findByPk(id, { transaction });
           if (!updatedRecord) {
             handleNotFound({
               res,
@@ -215,6 +232,7 @@ class ModelViewSet<T extends Model> {
         promise: this.model.destroy({ where: { id: id as any }, transaction }),
         message: `${this.name || this.model.name || ""} deleted successfully`,
         res,
+        callback: undefined,
         resData: (deleted) => {
           if (!deleted) {
             handleNotFound({
@@ -232,6 +250,37 @@ class ModelViewSet<T extends Model> {
       });
     });
   };
+
+  // bulkDestroy = async (req: Request, res: Response) => {
+  //   const { ids } = req.body;
+
+  //   if (!Array.isArray(ids) || ids.length === 0) {
+  //     return res.status(400).json({ message: "Invalid or empty array of IDs" });
+  //   }
+
+  //   await withTransaction(async (transaction) => {
+  //     // Soft delete records using the `paranoid` option
+  //     await handleRequests({
+  //       promise: this.model.bulkDelete(
+  //         { id: { [Op.in]: ids } },
+  //         { transaction }
+  //       ),
+  //       message: `${this.model.name || ""} records deleted successfully`,
+  //       res,
+  //       statusCode: 200,
+  //       resData: (affectedRows: number) => {
+  //         if (affectedRows === 0) {
+  //           return res.status(404).json({
+  //             message: `${this.model.name || ""} records not found`,
+  //           });
+  //         }
+  //         return {
+  //           message: `${affectedRows} records soft deleted successfully`,
+  //         };
+  //       },
+  //     });
+  //   });
+  // };
 }
 
 function joiToSwagger(schema: any) {

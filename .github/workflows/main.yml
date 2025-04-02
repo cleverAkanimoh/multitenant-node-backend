@@ -16,15 +16,32 @@ jobs:
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRI_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /var/www/emnd/
-            git branch
-            git checkout main
-            git branch
+            
+            # Load NVM and set PATH correctly
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+            export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
+
+            # Debugging: Print node, yarn, and pm2 paths
+            which node
+            which yarn
+            which pm2
+
+            # Pull latest code
             git pull origin main
-            yarn install
+
+            # Install dependencies
+            yarn install --frozen-lockfile
+            
+            # Build the application
             yarn build
+
+            # Restart the app using PM2
             pm2 reload my-app

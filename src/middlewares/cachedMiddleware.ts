@@ -19,7 +19,15 @@ export const cacheMiddleware = async (
       debugLog("Cache hit:", key);
       return res.json(JSON.parse(cachedData));
     }
+
     debugLog("Cache missed:", key);
+
+    const originalSend = res.json.bind(res);
+    res.json = (body: any) => {
+      redisClient.set(key, JSON.stringify(body), { EX: 3600 });
+      return originalSend(body);
+    };
+
     next();
   } catch (error) {
     debugLog("Redis Middleware Error:\n", error);

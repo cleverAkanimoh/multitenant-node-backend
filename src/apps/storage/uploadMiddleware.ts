@@ -24,4 +24,7 @@ const storage = multer.diskStorage({
 
 const uploadMiddleware = multer({ storage });
 
+
+export const bulkUpload = multer({ storage: multer.memoryStorage() });
+
 export default uploadMiddleware;

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Model, ModelStatic } from "sequelize";
 import * as XLSX from "xlsx";
 import { getTenantModel } from "../../../core/multitenancy";
+import { convertCase } from "../../../utils/convertCase";
 import { customResponse } from "../../../utils/customResponse";
 import {
   handleNotFound,
@@ -87,9 +88,11 @@ class ModelViewSet<T extends Model> {
 
       return await handleRequests({
         promise: TenantModel.create(req.body, { transaction }),
-        message: `${req.body.name || ""} ${
-          this.name || TenantModel.name || ""
-        } created successfully`,
+        message: `${convertCase(req.body.name || "", "sentence")} ${(
+          this.name ||
+          TenantModel.name ||
+          ""
+        ).toLowerCase()} created successfully`,
         res,
         statusCode: 201,
       });
@@ -132,7 +135,11 @@ class ModelViewSet<T extends Model> {
 
     await handleRequests({
       promise: this.model.findByPk(id),
-      message: `${this.name || this.model.name || ""} retrieved successfully`,
+      message: `${convertCase(req.body.name || "", "sentence")} ${(
+        this.name ||
+        this.model.name ||
+        ""
+      ).toLowerCase()} retrieved successfully`,
       res,
       resData: (record) => {
         if (!record) {
@@ -170,23 +177,33 @@ class ModelViewSet<T extends Model> {
           where: { id: id as any },
           transaction,
         }),
-        message: `${this.name || this.model.name || ""} updated successfully`,
+        message: `${convertCase(req.body.name || "", "sentence")} ${(
+          this.name ||
+          this.model.name ||
+          ""
+        ).toLowerCase()} updated successfully`,
         res,
         callback: async () => {
           const updatedRecord = await TenantModel.findByPk(id, { transaction });
           if (!updatedRecord) {
             handleNotFound({
               res,
-              message: `${this.name || this.model.name || ""} not found`,
+              message: `${convertCase(req.body.name || "", "sentence")} ${(
+                this.name ||
+                this.model.name ||
+                ""
+              ).toLowerCase()} not found`,
             });
           } else {
             return res.status(200).json(
               customResponse({
                 data: updatedRecord,
                 statusCode: 200,
-                message: `${
-                  this.name || this.model.name || ""
-                } updated successfully`,
+                message: `${convertCase(req.body.name || "", "sentence")} ${(
+                  this.name ||
+                  this.model.name ||
+                  ""
+                ).toLowerCase()} updated successfully`,
               })
             );
           }
@@ -209,9 +226,26 @@ class ModelViewSet<T extends Model> {
       const sheet = workbook.Sheets[sheetName];
       const data = XLSX.utils.sheet_to_json(sheet);
 
+      console.log({ data });
+
       if (this.schema) {
-        for (const record of data) {
+        for (const record of data as Record<string, any>[]) {
+          (record as any).tenantId = req.company;
+          (record as any).createdBy = (req.user as { email: string })?.email;
+
+          for (const key in record) {
+            const camelCaseKey = convertCase(key, "camel");
+            if (camelCaseKey !== key) {
+              record[camelCaseKey] = record[key];
+              delete record[key];
+            }
+          }
+
+          console.log({ record });
+
           const { error } = this.schema.validate(record);
+          console.log({ error });
+
           if (error) {
             return handleValidationError(res, error);
           }
@@ -219,8 +253,11 @@ class ModelViewSet<T extends Model> {
       }
 
       await withTransaction(async (transaction) => {
+        const TenantModel = this.isTenantModel
+          ? getTenantModel(this.model, req.company)
+          : this.model;
         await handleRequests({
-          promise: this.model.bulkCreate(data as any, { transaction }),
+          promise: TenantModel.bulkCreate(data as any, { transaction }),
           message: `${this.model.name || ""} records uploaded successfully`,
           res,
           statusCode: 201,
@@ -243,20 +280,30 @@ class ModelViewSet<T extends Model> {
     await withTransaction(async (transaction) => {
       await handleRequests({
         promise: TenantModel.destroy({ where: { id: id as any }, transaction }),
-        message: `${this.name || TenantModel.name || ""} deleted successfully`,
+        message: `${(
+          this.name ||
+          TenantModel.name ||
+          ""
+        ).toLowerCase()} deleted successfully`,
         res,
         resData: (deleted) => {
           if (!deleted) {
             handleNotFound({
               res,
-              message: `${this.name || TenantModel.name || ""} not found`,
+              message: `${(
+                this.name ||
+                TenantModel.name ||
+                ""
+              ).toLowerCase()} not found`,
             });
             return null;
           }
           return {
-            message: `${
-              this.name || TenantModel.name || ""
-            } deleted successfully`,
+            message: `${(
+              this.name ||
+              TenantModel.name ||
+              ""
+            ).toLowerCase()} deleted successfully`,
           };
         },
       });

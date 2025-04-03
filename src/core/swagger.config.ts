@@ -1,12 +1,12 @@
 import { Express } from "express";
 import redoc from "redoc-express";
-import swaggerAutogen from "swagger-autogen";
 import swaggerUi from "swagger-ui-express";
 
 import { debugLog } from "../utils/debugLog";
 import { baseUrl, docTitle } from "./configs";
 
-import swaggerSpecs from "../core/swagger-output.json";
+import swaggerSpecs from "../swagger-output.json";
+import { generateSwaggerSchema } from "../utils/generateSwaggerSpecs";
 
 const endpointsFiles = [
   "./src/apps/**/routes.ts",
@@ -15,7 +15,7 @@ const endpointsFiles = [
   "./src/**/*.ts",
 ];
 
-const outputFile = "./src/core/swagger-output.json";
+const outputFile = "./src/swagger-output.json";
 
 const swaggerOptions = {
   info: {
@@ -37,12 +37,10 @@ const swaggerOptions = {
   security: [{ BearerAuth: [] }],
 };
 
-const swaggerAutogenInstance = swaggerAutogen();
-
 export const redocConfig = { title: docTitle, specUrl: "/redoc" };
 
 export const setupSwagger = async (app: Express) => {
-  await swaggerAutogenInstance(outputFile, endpointsFiles, swaggerOptions);
+  generateSwaggerSchema();
 
   app.use(
     "/docs",

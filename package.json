@@ -57,7 +57,6 @@
     "sequelize": "^6.37.6",
     "socket.io": "^4.8.1",
     "speakeasy": "^2.0.0",
-    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0",

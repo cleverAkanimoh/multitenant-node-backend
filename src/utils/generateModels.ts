@@ -36,9 +36,10 @@ const attributes = headers.map((value) => convertCase(value, "camel"));
 
 // Generate Sequelize Model
 const sequelizeModel = `import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../../../../core/orm";
+import Company from "../../company/models";
 
-
-export interface ${convertCase(fileName, "pascal")}ModelAttributes {
+export interface ${convertCase(fileName, "pascal")}Attributes {
   id: number;
   ${attributes.map((attr) => `${attr}: string;`).join("\n  ")}
 }

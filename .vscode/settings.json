@@ -6,6 +6,7 @@
         "multitenancy",
         "SENDINBLUE",
         "SUPERADMIN",
+        "TEAMLEAD",
         "UUIDV",
         "Viewset"
     ]

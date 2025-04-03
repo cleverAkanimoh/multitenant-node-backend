@@ -1,5 +1,6 @@
-import { QueryTypes, Sequelize } from "sequelize";
+import { QueryTypes } from "sequelize";
 import Company from "../apps/(dashboard)/company/models";
+import Perspective from "../apps/(dashboard)/perspectives/models";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
 import sequelize from "./orm";
@@ -37,30 +38,31 @@ export const deleteTenantSchema = async (tenantId: string) => {
 };
 
 // Function to sync schemas
-export async function syncTenantSchemas() {
+export async function syncSchemas() {
   try {
+    debugLog("Synchronizing Public Schema(s)");
+
+    const modelsToSync = [User, Company];
+
+    for (const model of modelsToSync) {
+      await model.sync({ alter: true });
+      debugLog(`✅ ${model.name} synchronized.`);
+    }
+
     const tenantSchemas = await getTenantSchemas();
 
     for (const schema of tenantSchemas) {
-      debugLog(`🔄 Syncing schema: ${schema}`);
-
-      // Create a new Sequelize instance for the schema
-      const tenantSequelize = new Sequelize(
-        process.env.DATABASE_URL as string,
-        {
-          dialect: "postgres",
-          logging: false,
-          define: { schema },
-        }
-      );
+      debugLog(`🔄 Syncing Tenant schema ${schema}`);
 
       const TenantUser = getTenantModel(User, schema);
-      const TenantCompany = getTenantModel(Company, schema);
+      const TenantPerspective = getTenantModel(Perspective, schema);
 
-      // Sync models
-      await TenantUser.sync({ alter: true });
-      await TenantCompany.sync({ alter: true });
-      debugLog(`✅ Synced schema: ${schema}`);
+      const modelsToSync = [User, Company, TenantUser, TenantPerspective];
+
+      for (const model of modelsToSync) {
+        await model.sync({ alter: true });
+        debugLog(`✅ ${model.name} synchronized.`);
+      }
     }
   } catch (error) {
     debugLog("❌ Error syncing tenant schemas:", error);

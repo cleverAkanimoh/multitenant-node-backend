@@ -40,13 +40,34 @@ class ModelViewSet<T extends Model> {
     this.isTenantModel = isTenantModel;
   }
 
-  current = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
-
-    const TenantModel = this.isTenantModel
+  private getTenantModel(req: Request) {
+    return this.isTenantModel
       ? getTenantModel(this.model, req.company)
       : this.model;
+  }
 
+  private validateSchema(req: Request, res: Response) {
+    joiToSwagger(this.schema);
+    if (this.schema) {
+      const { error } = this.schema.validate(req.body);
+      if (error) {
+        handleValidationError(res, error);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private handleRecordNotFound(res: Response, record: any, message: string) {
+    if (!record) {
+      handleNotFound({ res, message });
+      return true;
+    }
+    return false;
+  }
+
+  current = async (req: Request, res: Response) => {
+    const TenantModel = this.getTenantModel(req);
     return handleRequests({
       promise: TenantModel.findByPk(req.company),
       message: null,
@@ -55,15 +76,9 @@ class ModelViewSet<T extends Model> {
   };
 
   create = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
-    if (this.schema) {
-      const { error } = this.schema.validate(req.body);
-      if (error) return handleValidationError(res, error);
-    }
+    if (!this.validateSchema(req, res)) return;
 
-    const TenantModel = this.isTenantModel
-      ? getTenantModel(this.model, req.company)
-      : this.model;
+    const TenantModel = this.getTenantModel(req);
 
     return await withTransaction(async (transaction) => {
       if (req.body.name) {
@@ -75,7 +90,7 @@ class ModelViewSet<T extends Model> {
           return res.status(400).json(
             customResponse({
               statusCode: 400,
-              message: `${req.body.name} ${
+              message: `${convertCase(req.body.name, "sentence")} ${
                 this.name?.toLowerCase() ||
                 TenantModel.name?.toLowerCase() ||
                 ""
@@ -88,11 +103,9 @@ class ModelViewSet<T extends Model> {
 
       return await handleRequests({
         promise: TenantModel.create(req.body, { transaction }),
-        message: `${convertCase(req.body.name || "", "sentence")} ${(
-          this.name ||
-          TenantModel.name ||
-          ""
-        ).toLowerCase()} created successfully`,
+        message: `${convertCase(req.body.name || "", "sentence")} ${
+          this.name?.toLowerCase() || TenantModel.name?.toLowerCase() || ""
+        } created successfully`,
         res,
         statusCode: 201,
       });
@@ -100,14 +113,11 @@ class ModelViewSet<T extends Model> {
   };
 
   list = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
     const limitValue = Number(limit);
 
-    const TenantModel = this.isTenantModel
-      ? getTenantModel(this.model, req.company)
-      : this.model;
+    const TenantModel = this.getTenantModel(req);
 
     await handleRequests({
       promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
@@ -130,23 +140,22 @@ class ModelViewSet<T extends Model> {
   };
 
   retrieve = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
     const { id } = req.params;
 
     await handleRequests({
       promise: this.model.findByPk(id),
-      message: `${convertCase(req.body.name || "", "sentence")} ${(
-        this.name ||
-        this.model.name ||
-        ""
-      ).toLowerCase()} retrieved successfully`,
+      message: `${convertCase(req.body.name || "", "sentence")} ${
+        this.name?.toLowerCase() || this.model.name?.toLowerCase() || ""
+      } retrieved successfully`,
       res,
       resData: (record) => {
-        if (!record) {
-          handleNotFound({
+        if (
+          this.handleRecordNotFound(
             res,
-            message: `${this.name || this.model.name || ""} not found`,
-          });
+            record,
+            `${this.name || this.model.name || ""} not found`
+          )
+        ) {
           return null;
         }
         return record;
@@ -155,21 +164,12 @@ class ModelViewSet<T extends Model> {
   };
 
   update = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
+    if (!this.validateSchema(req, res)) return;
+
     const { id } = req.params;
+    if (!id) throw new Error("No id found in request param");
 
-    if (this.schema) {
-      const { error } = this.schema.validate(req.body);
-      if (error) return handleValidationError(res, error);
-    }
-
-    if (!id) {
-      throw new Error("No id found in request param");
-    }
-
-    const TenantModel = this.isTenantModel
-      ? getTenantModel(this.model, req.company)
-      : this.model;
+    const TenantModel = this.getTenantModel(req);
 
     await withTransaction(async (transaction) => {
       await handleRequests({
@@ -177,43 +177,38 @@ class ModelViewSet<T extends Model> {
           where: { id: id as any },
           transaction,
         }),
-        message: `${convertCase(req.body.name || "", "sentence")} ${(
-          this.name ||
-          this.model.name ||
-          ""
-        ).toLowerCase()} updated successfully`,
+        message: `${convertCase(req.body.name || "", "sentence")} ${
+          this.name?.toLowerCase() || this.model.name?.toLowerCase() || ""
+        } updated successfully`,
         res,
         callback: async () => {
           const updatedRecord = await TenantModel.findByPk(id, { transaction });
-          if (!updatedRecord) {
-            handleNotFound({
+          if (
+            this.handleRecordNotFound(
               res,
-              message: `${convertCase(req.body.name || "", "sentence")} ${(
-                this.name ||
-                this.model.name ||
-                ""
-              ).toLowerCase()} not found`,
-            });
-          } else {
-            return res.status(200).json(
-              customResponse({
-                data: updatedRecord,
-                statusCode: 200,
-                message: `${convertCase(req.body.name || "", "sentence")} ${(
-                  this.name ||
-                  this.model.name ||
-                  ""
-                ).toLowerCase()} updated successfully`,
-              })
-            );
+              updatedRecord,
+              `${convertCase(req.body.name || "", "sentence")} ${
+                this.name?.toLowerCase() || this.model.name?.toLowerCase() || ""
+              } not found`
+            )
+          ) {
+            return;
           }
+          return res.status(200).json(
+            customResponse({
+              data: updatedRecord,
+              statusCode: 200,
+              message: `${convertCase(req.body.name || "", "sentence")} ${
+                this.name?.toLowerCase() || this.model.name?.toLowerCase() || ""
+              } updated successfully`,
+            })
+          );
         },
       });
     });
   };
 
   bulkUpload = async (req: Request, res: Response) => {
-    joiToSwagger(this.schema);
     const file = req.file;
 
     if (!file) {
@@ -224,15 +219,15 @@ class ModelViewSet<T extends Model> {
       const workbook = XLSX.read(file.buffer, { type: "buffer" });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(sheet);
-
-      console.log({ data });
+      const data = XLSX.utils.sheet_to_json(sheet) as Record<string, any>[];
 
       if (this.schema) {
-        for (const record of data as Record<string, any>[]) {
-          (record as any).tenantId = req.company;
-          (record as any).createdBy = (req.user as { email: string })?.email;
-
+        for (const record of data) {
+          record.tenantId = req.company;
+          record.createdBy = (req.user as { email: string })?.email;
+          if (record.name) {
+            record.name = record.name.toLowerCase();
+          }
           for (const key in record) {
             const camelCaseKey = convertCase(key, "camel");
             if (camelCaseKey !== key) {
@@ -241,24 +236,43 @@ class ModelViewSet<T extends Model> {
             }
           }
 
-          console.log({ record });
-
           const { error } = this.schema.validate(record);
-          console.log({ error });
-
           if (error) {
             return handleValidationError(res, error);
           }
         }
       }
+      const TenantModel = this.getTenantModel(req);
+
+      for (const record of data) {
+        if (record.name) {
+          const existingRecord = await TenantModel.findOne({
+            where: { name: record.name.toLowerCase() },
+          });
+
+          if (existingRecord) {
+            return res.status(400).json(
+              customResponse({
+                statusCode: 400,
+                message: `${convertCase(record.name, "sentence")} ${
+                  this.name?.toLowerCase() ||
+                  TenantModel.name?.toLowerCase() ||
+                  ""
+                } already exists`,
+                data: existingRecord,
+              })
+            );
+          }
+        }
+      }
 
       await withTransaction(async (transaction) => {
-        const TenantModel = this.isTenantModel
-          ? getTenantModel(this.model, req.company)
-          : this.model;
         await handleRequests({
-          promise: TenantModel.bulkCreate(data as any, { transaction }),
-          message: `${this.model.name || ""} records uploaded successfully`,
+          promise: TenantModel.bulkCreate(data, { transaction }),
+          message: `${convertCase(
+            this.model.name || "",
+            "sentence"
+          )} records uploaded successfully`,
           res,
           statusCode: 201,
         });
@@ -273,73 +287,36 @@ class ModelViewSet<T extends Model> {
   destroy = async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    const TenantModel = this.isTenantModel
-      ? getTenantModel(this.model, req.company)
-      : this.model;
+    const TenantModel = this.getTenantModel(req);
 
     await withTransaction(async (transaction) => {
       await handleRequests({
         promise: TenantModel.destroy({ where: { id: id as any }, transaction }),
-        message: `${(
-          this.name ||
-          TenantModel.name ||
-          ""
-        ).toLowerCase()} deleted successfully`,
+        message: `${
+          this.name?.toLowerCase() || TenantModel.name?.toLowerCase() || ""
+        } deleted successfully`,
         res,
         resData: (deleted) => {
           if (!deleted) {
             handleNotFound({
               res,
-              message: `${(
-                this.name ||
-                TenantModel.name ||
+              message: `${
+                this.name?.toLowerCase() ||
+                TenantModel.name?.toLowerCase() ||
                 ""
-              ).toLowerCase()} not found`,
+              } not found`,
             });
             return null;
           }
           return {
-            message: `${(
-              this.name ||
-              TenantModel.name ||
-              ""
-            ).toLowerCase()} deleted successfully`,
+            message: `${
+              this.name?.toLowerCase() || TenantModel.name?.toLowerCase() || ""
+            } deleted successfully`,
           };
         },
       });
     });
   };
-
-  // bulkDestroy = async (req: Request, res: Response) => {
-  //   const { ids } = req.body;
-
-  //   if (!Array.isArray(ids) || ids.length === 0) {
-  //     return res.status(400).json({ message: "Invalid or empty array of IDs" });
-  //   }
-
-  //   await withTransaction(async (transaction) => {
-  //     // Soft delete records using the `paranoid` option
-  //     await handleRequests({
-  //       promise: this.model.bulkDelete(
-  //         { id: { [Op.in]: ids } },
-  //         { transaction }
-  //       ),
-  //       message: `${this.model.name || ""} records deleted successfully`,
-  //       res,
-  //       statusCode: 200,
-  //       resData: (affectedRows: number) => {
-  //         if (affectedRows === 0) {
-  //           return res.status(404).json({
-  //             message: `${this.model.name || ""} records not found`,
-  //           });
-  //         }
-  //         return {
-  //           message: `${affectedRows} records soft deleted successfully`,
-  //         };
-  //       },
-  //     });
-  //   });
-  // };
 }
 
 function joiToSwagger(schema: any) {

@@ -65,7 +65,7 @@ Company.hasMany(Perspective, {
 
 Perspective.belongsTo(Company, {
   foreignKey: { name: "tenantId", allowNull: true },
-  as: "Perspective",
+  as: "company",
 });
 
 export default Perspective;

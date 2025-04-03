@@ -1,4 +1,4 @@
-import Company from "../(dashboard)/company/models";
+import Organization from "../(dashboard)/organization/models";
 import {
   createTenantSchema,
   deleteTenantSchema,
@@ -27,7 +27,7 @@ export const cleanUserData = async (user: User) => {
   const isHr = user.userRole === Roles.ADMIN;
   const isStaff = user.userRole === Roles.STAFF;
 
-  const company = await Company.findByPk(user.tenantId);
+  const organization = await Organization.findByPk(user.tenantId);
 
   const cleanData = {
     id: user.id,
@@ -45,12 +45,12 @@ export const cleanUserData = async (user: User) => {
     hasCompletedCompanyProfile:
       isSuperAdmin &&
       Boolean(
-        company?.name &&
-          company?.shortName &&
-          company?.breakTimeRange &&
-          company?.primaryTimezone &&
-          company?.workTimeRange &&
-          company?.workDays
+        organization?.name &&
+          organization?.shortName &&
+          organization?.breakTimeRange &&
+          organization?.primaryTimezone &&
+          organization?.workTimeRange &&
+          organization?.workDays
       ),
     isNewUser: user.isNewRecord,
   };
@@ -106,7 +106,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
     });
 
     if (superAdminExists) {
-      throw new Error("Company already exists");
+      throw new Error("Organization already exists");
     }
   }
 
@@ -114,16 +114,16 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
   const TenantUser = getTenantModel(User, tenantIdIfNone);
 
-  TenantUser.belongsTo(Company, {
+  TenantUser.belongsTo(Organization, {
     foreignKey: { name: "tenantId", allowNull: false },
-    as: tenantIdIfNone + "-company",
+    as: tenantIdIfNone + "-organization",
   });
 
   await TenantUser.sync({ alter: true });
 
   try {
     return await withTransaction(async (transaction) => {
-      const company = await Company.create(
+      const organization = await Organization.create(
         {
           id: tenantIdIfNone,
           name: tenantIdIfNone,
@@ -132,9 +132,9 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         },
         { transaction }
       );
-      if (!company) throw new Error("Company creation failed");
+      if (!organization) throw new Error("Organization creation failed");
 
-      console.log({ company });
+      console.log({ organization });
 
       const newUser = await TenantUser.create(
         {
@@ -149,8 +149,8 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
         { transaction }
       );
 
-      company.ownerId = newUser.id;
-      await company.save({ transaction });
+      organization.ownerId = newUser.id;
+      await organization.save({ transaction });
 
       const user = await User.create(
         {

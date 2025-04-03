@@ -80,7 +80,7 @@ export const resetPasswordSchema = Joi.object({
 
 export const resendActivationEmailSchema = Joi.object({
   email: Joi.string().email().required(),
-  type: Joi.string().valid("user", "company").required(),
+  type: Joi.string().valid("user", "organization").required(),
 });
 
 export const verifyAccountSchema = Joi.object({

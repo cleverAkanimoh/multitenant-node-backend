@@ -1,6 +1,6 @@
 import Joi from "joi";
 import ModelViewSet from "../../../shared/controllers/ModelViewset";
-import Company from "../models";
+import Organization from "../models";
 
 export const companySchema = Joi.object({
   name: Joi.string().optional(),
@@ -44,7 +44,7 @@ export const companySchema = Joi.object({
 });
 
 const CompanyController = new ModelViewSet({
-  model: Company,
+  model: Organization,
   schema: companySchema,
   name: "Organization",
   isTenantModel: false,

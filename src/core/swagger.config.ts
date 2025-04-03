@@ -1,11 +1,12 @@
 import { Express } from "express";
-import swaggerUi from "swagger-ui-express";
-
 import redoc from "redoc-express";
-import swaggerJSDoc from "swagger-jsdoc";
+import swaggerAutogen from "swagger-autogen";
+import swaggerUi from "swagger-ui-express";
 
 import { debugLog } from "../utils/debugLog";
 import { baseUrl, docTitle } from "./configs";
+
+import swaggerSpecs from "../core/swagger-output.json";
 
 const endpointsFiles = [
   "./src/apps/**/routes.ts",
@@ -14,40 +15,44 @@ const endpointsFiles = [
   "./src/**/*.ts",
 ];
 
+const outputFile = "./src/core/swagger-output.json";
+
 const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "E-metrics Suite API",
-      version: "1.0.0",
-      description: "API documentation for E-metrics Suite",
-    },
-    servers: [{ url: baseUrl }],
-    components: {
-      securitySchemes: {
-        BearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-      // requestBodies: {
-      //   CreateRequestBody: (ModelViewSet as any).getRequestBodySchema(),
-      // },
-    },
-    security: [{ BearerAuth: [] }],
+  info: {
+    title: docTitle,
+    version: "1.0.0",
+    description: "API documentation for E-metrics Suite",
   },
-  apis: ["./src/**/*.ts ", ...endpointsFiles],
+  host: baseUrl?.replace(/^https?:\/\//, ""),
+  schemes: baseUrl?.startsWith("https") ? ["https"] : ["http"],
+  securityDefinitions: {
+    BearerAuth: {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      description:
+        "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+    },
+  },
+  security: [{ BearerAuth: [] }],
 };
 
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const swaggerAutogenInstance = swaggerAutogen();
 
 export const redocConfig = { title: docTitle, specUrl: "/redoc" };
 
-export const setupSwagger = (app: Express) => {
-  app.use("/docs", swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
+export const setupSwagger = async (app: Express) => {
+  await swaggerAutogenInstance(outputFile, endpointsFiles, swaggerOptions);
+
+  app.use(
+    "/docs",
+    swaggerUi.serve as any,
+    swaggerUi.setup(swaggerSpecs) as any
+  );
+
   app.get("/redoc", redoc(redocConfig));
-  debugLog("📃 Swagger docs available at "+baseUrl+"/docs");
+
+  debugLog("📃 Swagger docs available at " + baseUrl + "/docs");
 };
 
 export default setupSwagger;

@@ -1,81 +1,74 @@
-<<<<<<< HEAD
-name: Deploy
-=======
 name: Deploy Express App
->>>>>>> 78d4f8a15d0a8a8351cc5f68f09316eeb08c61fb
 
 on:
   push:
     branches:
-<<<<<<< HEAD
       - staging   # Staging branch for staging environment
       - main      # Main branch for production environment
-
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Staging
-        if: github.ref == 'refs/heads/staging'
-        uses: appleboy/ssh-action@master
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "DEPLOY_HOST=${{ secrets.HOST }}" >> $GITHUB_ENV
+            echo "BRANCH=main" >> $GITHUB_ENV
+            echo "USE_NVM=true" >> $GITHUB_ENV  # Production uses NVM
+          else
+            echo "DEPLOY_HOST=${{ secrets.STAGING_HOST }}" >> $GITHUB_ENV
+            echo "BRANCH=staging" >> $GITHUB_ENV
+            echo "USE_NVM=false" >> $GITHUB_ENV  # Staging uses global Node.js
+          fi
+
+      - name: Deploy to Ubuntu Server
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.STAGING_HOST }}
+          host: ${{ env.DEPLOY_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRI_KEY }}
-          port: 22
           script: |
-            echo "Changing directory to the app folder"
             cd /var/www/emnd/
 
-            echo "Pulling latest changes from remote"
-            git pull
+            # Ensure NVM and Node.js are correctly loaded
+            if [ "$USE_NVM" == "true" ]; then
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+              [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+              export PATH="$NVM_DIR/versions/node/$(ls $NVM_DIR/versions/node)/bin:$PATH"
+            else
+              export PATH="/usr/bin:$PATH"  # Use system-installed Node.js on staging
+            fi
 
-            echo "Checking out staging branch"
-            git checkout staging
-            
-            echo "Pulling latest updates from remote"
-            git pull origin staging
-            
-            echo "Installing dependencies"
+            # Debugging: Check versions to confirm environment is correct
+            echo "Node.js: $(which node)"
+            echo "Node.js Version: $(node -v)"
+            echo "Yarn: $(which yarn)"
+            echo "PM2: $(which pm2)"
+
+            echo "Deploying to $BRANCH branch on $DEPLOY_HOST"
+
+            # Checkout the correct branch and pull latest code
+            git checkout $BRANCH
+            git pull origin $BRANCH
+
+            # Ensure Yarn is installed correctly
+            yarn --version || npm install -g yarn
+
+            # Install dependencies
             yarn install
             
+
             echo "Building the app"
             yarn build
             
             echo "Reloading the app with PM2"
             pm2 reload my-app
 
-      - name: Deploy to Production
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRI_KEY }}
-          port: 22
-          script: |
-            echo "Changing directory to the app folder"
-            cd /var/www/emnd/
-
-            echo "Pulling latest changes from remote"
-            git pull
-
-            echo "Checking out main branch"
-            git checkout main
-            
-            echo "Pulling latest updates from remote"
-            git pull origin main
-            
-            echo "Installing dependencies"
-            yarn install
-            
-            echo "Building the app"
-            yarn build
-            
-            echo "Reloading the app with PM2"
-            pm2 reload my-app
-=======
       - main
       - staging
 
@@ -136,9 +129,10 @@ jobs:
             # Install dependencies
             yarn install
             
+
             # Build the application
             yarn build || echo "Build failed"
 
             # Restart the app using PM2
             pm2 reload my-app || echo "PM2 reload failed"
->>>>>>> 78d4f8a15d0a8a8351cc5f68f09316eeb08c61fb
+

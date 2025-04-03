@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
-import Company from "../../company/models";
+import Organization from "../../organization/models";
 
 export interface ObjectiveAttributes {
   id: number;
@@ -85,7 +85,7 @@ Objective.init(
 
 export default Objective;
 
-Company.hasMany(Objective, {
+Organization.hasMany(Objective, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -95,7 +95,7 @@ Company.hasMany(Objective, {
   onUpdate: "CASCADE",
 });
 
-Objective.belongsTo(Company, {
+Objective.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: true },
-  as: "company",
+  as: "organization",
 });

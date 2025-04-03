@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
-import Company from "../../company/models";
+import Organization from "../../organization/models";
 
 export interface PerspectiveAttributes {
   id: number;
@@ -53,7 +53,7 @@ Perspective.init(
   }
 );
 
-Company.hasMany(Perspective, {
+Organization.hasMany(Perspective, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -63,9 +63,9 @@ Company.hasMany(Perspective, {
   onUpdate: "CASCADE",
 });
 
-Perspective.belongsTo(Company, {
+Perspective.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: true },
-  as: "company",
+  as: "organization",
 });
 
 export default Perspective;

@@ -1,4 +1,7 @@
+
 import Joi from "joi";
+import ModelViewSet from "../../../shared/controllers/ModelViewset";
+import CareerPath from "../models";
 
 export const CareerPathSchema = Joi.object({
   name: Joi.string().required(),
@@ -11,3 +14,10 @@ export const CareerPathSchema = Joi.object({
   slotsAvailable: Joi.string().required(),
   annualPackage: Joi.string().required(),
 });
+
+const CareerPathController = new ModelViewSet({
+  model: CareerPath,
+  schema: CareerPathSchema,
+});
+
+export default CareerPathController;

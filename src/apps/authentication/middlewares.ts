@@ -10,7 +10,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: User | undefined;
-      company: string;
+      organization: string;
       tenantUserModel?: User;
     }
   }
@@ -22,8 +22,7 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   const token = req.header("Authorization")?.split(" ")[1];
-  if (!token)
-    return res.status(401).json({ error: "You are not authorized" });
+  if (!token) return res.status(401).json({ error: "You are not authorized" });
 
   try {
     const decoded = verifyJwtToken(token);
@@ -37,7 +36,7 @@ export const authenticate = async (
     const user = await TenantUser.findByPk(decoded.userId);
 
     req.user = user;
-    req.company = decoded.tenantId;
+    req.organization = decoded.tenantId;
     req.tenantUserModel = getTenantModel(User, decoded.tenantId);
 
     next();

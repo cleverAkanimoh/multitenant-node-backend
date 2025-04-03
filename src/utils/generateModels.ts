@@ -14,6 +14,9 @@ if (args.length === 0) {
 const filePath = args[0];
 const fileName = args[1];
 
+const PascalFileName = convertCase(fileName, "pascal");
+const camelFileName = convertCase(fileName, "camel");
+
 // Load Excel file
 const workbook = xlsx.readFile(filePath);
 const sheetName = workbook.SheetNames[0];
@@ -26,20 +29,15 @@ if (!headers) {
   process.exit(1);
 }
 
-// const toCamelCase = (str: string): string =>
-//   str
-//     .replace(/\s(.)/g, (match) => match.toUpperCase())
-//     .replace(/\s/g, "") // Remove spaces
-//     .replace(/^(.)/, (match) => match.toLowerCase());
-
 const attributes = headers.map((value) => convertCase(value, "camel"));
+const basePath = `C:/Users/Crush_Clever/software_development/WD/BE/emetrics-backend/src/apps/(dashboard)/${camelFileName}/`;
 
 // Generate Sequelize Model
 const sequelizeModel = `import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
-import Company from "../../company/models";
+import Organization from "../../organization/models";
 
-export interface ${convertCase(fileName, "pascal")}Attributes {
+export interface ${PascalFileName}Attributes {
   id: number;
   ${attributes.map((attr) => `${attr}: string;`).join("\n  ")}
 }
@@ -52,13 +50,13 @@ export interface ${convertCase(
   "pascal"
 )}Attributes, "id"> {}
 
-class ${convertCase(fileName, "pascal")} extends Model<${convertCase(
+class ${PascalFileName} extends Model<${convertCase(
   fileName,
   "pascal"
 )}Attributes, ${convertCase(
   fileName,
   "pascal"
-)}CreationAttributes> implements ${convertCase(fileName, "pascal")}Attributes {
+)}CreationAttributes> implements ${PascalFileName}Attributes {
   public id!: number;
   ${attributes.map((attr) => `public ${attr}!: string;`).join("\n  ")}
 
@@ -66,7 +64,7 @@ class ${convertCase(fileName, "pascal")} extends Model<${convertCase(
   public readonly updatedAt!: Date;
 }
 
-${convertCase(fileName, "pascal")}.init(
+${PascalFileName}.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -85,12 +83,12 @@ ${convertCase(fileName, "pascal")}.init(
   {
     sequelize,
     tableName: "${fileName.toLowerCase()}",
-    modelName: "${convertCase(fileName, "pascal")}",
+    modelName: "${PascalFileName}",
     timestamps: true,
   }
 );
 
-Company.hasMany(${convertCase(fileName, "pascal")}, {
+Organization.hasMany(${PascalFileName}, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -100,22 +98,52 @@ Company.hasMany(${convertCase(fileName, "pascal")}, {
   onUpdate: "CASCADE",
 });
 
-${convertCase(fileName, "pascal")}.belongsTo(Company, {
+${PascalFileName}.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
-  as: "company",
+  as: "organization",
 });
 
-export default ${convertCase(fileName, "pascal")};
+export default ${PascalFileName};
 `;
 
-const basePath = `C:/Users/Crush_Clever/software_development/WD/BE/emetrics-backend/src/apps/(dashboard)/${fileName.toLowerCase()}/`;
+const controller = `
+import Joi from "joi";
+import ModelViewSet from "../../../shared/controllers/ModelViewset";
+import ${fileName} from "../models";
 
-// Generate Joi Schema
-const joiSchema = `import Joi from "joi";
-
-export const ${convertCase(fileName, "pascal")}Schema = Joi.object({
+export const ${PascalFileName}Schema = Joi.object({
   ${attributes.map((attr) => `${attr}: Joi.string().required(),`).join("\n  ")}
 });
+
+const ${PascalFileName}Controller = new ModelViewSet({
+  model: ${PascalFileName},
+  schema: ${PascalFileName}Schema,
+});
+
+export default ${PascalFileName}Controller;
+`;
+
+const routes = `
+import { Router } from "express";
+
+import { bulkUpload } from "../../../storage/uploadMiddleware";
+import ${PascalFileName}Controller from "../controllers";
+
+const router = Router();
+
+router.get("/", ${PascalFileName}Controller.list);
+router.post("/", ${PascalFileName}Controller.create);
+router.get("/:id", ${PascalFileName}Controller.retrieve);
+router.put("/:id", ${PascalFileName}Controller.update);
+router.delete("/:id", ${PascalFileName}Controller.destroy);
+router.post(
+  "/bulk-upload",
+  bulkUpload.single("file") as any,
+  ${PascalFileName}Controller.bulkUpload
+);
+
+export default router;
+
 `;
 
 const ensureDirExists = (dirPath: string) => {
@@ -124,17 +152,18 @@ const ensureDirExists = (dirPath: string) => {
   }
 };
 
-// Define paths
 const modelPath = path.join(basePath, "models");
-const schemaPath = path.join(basePath, "schema");
+const controllerPath = path.join(basePath, "controllers");
+const routePath = path.join(basePath, "routes");
 
-// Create directories if they don't exist
 ensureDirExists(modelPath);
-ensureDirExists(schemaPath);
+ensureDirExists(controllerPath);
+ensureDirExists(routePath);
 
-// Save files
 fs.writeFileSync(path.join(modelPath, "index.ts"), sequelizeModel);
-fs.writeFileSync(path.join(schemaPath, "index.ts"), joiSchema);
+fs.writeFileSync(path.join(controllerPath, "index.ts"), controller);
+fs.writeFileSync(path.join(routePath, "index.ts"), routes);
 
 console.log("Sequelize model saved in: " + path.join(modelPath, "index.ts"));
-console.log("Joi schema saved in: " + path.join(schemaPath, "index.ts"));
+console.log("Controllers saved in: " + path.join(controllerPath, "index.ts"));
+console.log("Routes saved in: " + path.join(routePath, "index.ts"));

@@ -1,4 +1,6 @@
+
 import { Router } from "express";
+
 import { bulkUpload } from "../../../storage/uploadMiddleware";
 import PeopleController from "../controllers";
 
@@ -16,3 +18,4 @@ router.post(
 );
 
 export default router;
+

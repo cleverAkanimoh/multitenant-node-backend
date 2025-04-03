@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
-import Company from "../../company/models";
+import Organization from "../../organization/models";
 
 export interface KPIsModelAttributes {
   id: number;
@@ -89,7 +89,7 @@ KPIs.init(
   }
 );
 
-Company.hasMany(KPIs, {
+Organization.hasMany(KPIs, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -99,9 +99,9 @@ Company.hasMany(KPIs, {
   onUpdate: "CASCADE",
 });
 
-KPIs.belongsTo(Company, {
+KPIs.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
-  as: "company",
+  as: "organization",
 });
 
 export default KPIs;

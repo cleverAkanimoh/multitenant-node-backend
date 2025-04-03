@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
-import Company from "../../company/models";
+import Organization from "../../organization/models";
 
 export interface CareerPathAttributes {
   id: number;
@@ -15,9 +15,13 @@ export interface CareerPathAttributes {
   annualPackage: string;
 }
 
-export interface CareerPathCreationAttributes extends Optional<CareerPathAttributes, "id"> {}
+export interface CareerPathCreationAttributes
+  extends Optional<CareerPathAttributes, "id"> {}
 
-class CareerPath extends Model<CareerPathAttributes, CareerPathCreationAttributes> implements CareerPathAttributes {
+class CareerPath
+  extends Model<CareerPathAttributes, CareerPathCreationAttributes>
+  implements CareerPathAttributes
+{
   public id!: number;
   public name!: string;
   public level!: string;
@@ -44,35 +48,35 @@ CareerPath.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-       level: {
+    level: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       educationalQualification: {
+    educationalQualification: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       yearsOfExperience: {
+    yearsOfExperience: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       minAge: {
+    minAge: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       maxAge: {
+    maxAge: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       positionLifespan: {
+    positionLifespan: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       slotsAvailable: {
+    slotsAvailable: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-       annualPackage: {
+    annualPackage: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -85,7 +89,7 @@ CareerPath.init(
   }
 );
 
-Company.hasMany(CareerPath, {
+Organization.hasMany(CareerPath, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -95,9 +99,9 @@ Company.hasMany(CareerPath, {
   onUpdate: "CASCADE",
 });
 
-CareerPath.belongsTo(Company, {
+CareerPath.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
-  as: "company",
+  as: "organization",
 });
 
 export default CareerPath;

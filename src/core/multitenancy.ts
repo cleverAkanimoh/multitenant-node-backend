@@ -1,5 +1,5 @@
 import { QueryTypes } from "sequelize";
-import Company from "../apps/(dashboard)/company/models";
+import Organization from "../apps/(dashboard)/organization/models";
 import Perspective from "../apps/(dashboard)/perspectives/models";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
@@ -42,7 +42,7 @@ export async function syncSchemas() {
   try {
     debugLog("Synchronizing Public Schema(s)");
 
-    const modelsToSync = [User, Company];
+    const modelsToSync = [User, Organization];
 
     for (const model of modelsToSync) {
       await model.sync({ alter: true });
@@ -57,7 +57,7 @@ export async function syncSchemas() {
       const TenantUser = getTenantModel(User, schema);
       const TenantPerspective = getTenantModel(Perspective, schema);
 
-      const modelsToSync = [User, Company, TenantUser, TenantPerspective];
+      const modelsToSync = [User, Organization, TenantUser, TenantPerspective];
 
       for (const model of modelsToSync) {
         await model.sync({ alter: true });

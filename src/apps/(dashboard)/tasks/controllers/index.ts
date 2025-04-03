@@ -1,12 +1,12 @@
 
 import Joi from "joi";
 import ModelViewSet from "../../../shared/controllers/ModelViewset";
-import Task from "../models";
+import Tasks from "../models";
 
-export const TaskSchema = Joi.object({
+export const TasksSchema = Joi.object({
   name: Joi.string().required(),
   uplineInitiative: Joi.string().required(),
-  owner'sEmail: Joi.string().required(),
+ createdBy: Joi.string().required(),
   taskType: Joi.string().required(),
   routineType: Joi.string().required(),
   startDate: Joi.string().required(),
@@ -26,9 +26,9 @@ export const TaskSchema = Joi.object({
   turnAroundTimeTargetPoint: Joi.string().required(),
 });
 
-const TaskController = new ModelViewSet({
-  model: Task,
-  schema: TaskSchema,
+const TasksController = new ModelViewSet({
+  model: Tasks,
+  schema: TasksSchema,
 });
 
-export default TaskController;
+export default TasksController;

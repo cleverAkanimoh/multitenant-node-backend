@@ -1,9 +1,9 @@
 
 import Joi from "joi";
 import ModelViewSet from "../../../shared/controllers/ModelViewset";
-import Designation from "../models";
+import Designations from "../models";
 
-export const DesignationSchema = Joi.object({
+export const DesignationsSchema = Joi.object({
   name: Joi.string().required(),
   corporate: Joi.string().required(),
   division: Joi.string().required(),
@@ -12,9 +12,9 @@ export const DesignationSchema = Joi.object({
   unit: Joi.string().required(),
 });
 
-const DesignationController = new ModelViewSet({
-  model: Designation,
-  schema: DesignationSchema,
+const DesignationsController = new ModelViewSet({
+  model: Designations,
+  schema: DesignationsSchema,
 });
 
-export default DesignationController;
+export default DesignationsController;

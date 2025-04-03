@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
 import Organization from "../../organization/models";
 
-export interface DesignationAttributes {
+export interface DesignationsAttributes {
   id: number;
   name: string;
   corporate: string;
@@ -12,9 +12,9 @@ export interface DesignationAttributes {
   unit: string;
 }
 
-export interface DesignationCreationAttributes extends Optional<DesignationAttributes, "id"> {}
+export interface DesignationsCreationAttributes extends Optional<DesignationsAttributes, "id"> {}
 
-class Designation extends Model<DesignationAttributes, DesignationCreationAttributes> implements DesignationAttributes {
+class Designations extends Model<DesignationsAttributes, DesignationsCreationAttributes> implements DesignationsAttributes {
   public id!: number;
   public name!: string;
   public corporate!: string;
@@ -27,7 +27,7 @@ class Designation extends Model<DesignationAttributes, DesignationCreationAttrib
   public readonly updatedAt!: Date;
 }
 
-Designation.init(
+Designations.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -61,25 +61,25 @@ Designation.init(
   },
   {
     sequelize,
-    tableName: "designation",
-    modelName: "Designation",
+    tableName: "designations",
+    modelName: "Designations",
     timestamps: true,
   }
 );
 
-Organization.hasMany(Designation, {
+Organization.hasMany(Designations, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
   },
-  as: "designation",
+  as: "designations",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
-Designation.belongsTo(Organization, {
+Designations.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
   as: "organization",
 });
 
-export default Designation;
+export default Designations;

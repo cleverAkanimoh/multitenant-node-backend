@@ -10,7 +10,7 @@ export enum StructureLevel {
   UNIT = "unit",
 }
 
-export interface CompanyAttributes {
+export interface OrganizationAttributes {
   id: string;
   name?: string;
   shortName?: string;
@@ -29,12 +29,12 @@ export interface CompanyAttributes {
   ownerId?: string;
 }
 
-export interface CompanyCreationAttributes
-  extends Optional<CompanyAttributes, "id"> {}
+export interface OrganizationCreationAttributes
+  extends Optional<OrganizationAttributes, "id"> {}
 
 class Organization
-  extends Model<CompanyAttributes, CompanyCreationAttributes>
-  implements CompanyAttributes
+  extends Model<OrganizationAttributes, OrganizationCreationAttributes>
+  implements OrganizationAttributes
 {
   public id!: string;
   public name?: string;

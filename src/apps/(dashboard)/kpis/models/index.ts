@@ -8,7 +8,7 @@ export interface KPIsModelAttributes {
   uplineObjective: string;
   uplineInitiative: string;
   createdByEmail: string;
-  ownerEmail: string;
+  createdBy: string;
   routineType: string;
   startDate: string;
   endDate: string;
@@ -27,7 +27,7 @@ class KPIs
   public uplineObjective!: string;
   public uplineInitiative!: string;
   public createdByEmail!: string;
-  public ownerEmail!: string;
+  public createdBy!: string;
   public routineType!: string;
   public startDate!: string;
   public endDate!: string;
@@ -60,7 +60,7 @@ KPIs.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    ownerEmail: {
+    createdBy: {
       type: DataTypes.STRING,
       allowNull: false,
     },

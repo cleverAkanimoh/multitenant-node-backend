@@ -2,11 +2,11 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
 import Organization from "../../organization/models";
 
-export interface TaskAttributes {
+export interface TasksAttributes {
   id: number;
   name: string;
   uplineInitiative: string;
-  owner'sEmail: string;
+ createdBy: string;
   taskType: string;
   routineType: string;
   startDate: string;
@@ -26,13 +26,13 @@ export interface TaskAttributes {
   turnAroundTimeTargetPoint: string;
 }
 
-export interface TaskCreationAttributes extends Optional<TaskAttributes, "id"> {}
+export interface TasksCreationAttributes extends Optional<TasksAttributes, "id"> {}
 
-class Task extends Model<TaskAttributes, TaskCreationAttributes> implements TaskAttributes {
+class Tasks extends Model<TasksAttributes, TasksCreationAttributes> implements TasksAttributes {
   public id!: number;
   public name!: string;
   public uplineInitiative!: string;
-  public owner'sEmail!: string;
+  public createdBy!: string;
   public taskType!: string;
   public routineType!: string;
   public startDate!: string;
@@ -55,7 +55,7 @@ class Task extends Model<TaskAttributes, TaskCreationAttributes> implements Task
   public readonly updatedAt!: Date;
 }
 
-Task.init(
+Tasks.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -70,7 +70,7 @@ Task.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-       owner'sEmail: {
+      createdBy: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -145,25 +145,25 @@ Task.init(
   },
   {
     sequelize,
-    tableName: "task",
-    modelName: "Task",
+    tableName: "tasks",
+    modelName: "Tasks",
     timestamps: true,
   }
 );
 
-Organization.hasMany(Task, {
+Organization.hasMany(Tasks, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
   },
-  as: "task",
+  as: "tasks",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
-Task.belongsTo(Organization, {
+Tasks.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
   as: "organization",
 });
 
-export default Task;
+export default Tasks;

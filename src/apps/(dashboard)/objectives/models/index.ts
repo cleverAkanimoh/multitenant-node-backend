@@ -2,11 +2,25 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
 import Organization from "../../organization/models";
 
+export enum RoutineType {
+  ONCE = "once",
+  MONTHLY = "monthly",
+  QUARTERLY = "quarterly",
+  BI_ANNUALLY = "bi-Annually",
+  ANNUALLY = "annually",
+}
+
+export enum Status {
+  PENDING = "pending",
+  ACTIVE = "active",
+  CLOSE = "close",
+}
+
 export interface ObjectiveAttributes {
   id: number;
   name: string;
   corporate: string;
-  routineType: string;
+  routineType: RoutineType;
   startDate: Date;
   endDate?: Date;
   afterOccurrence: number;
@@ -17,7 +31,7 @@ export interface ObjectiveAttributes {
   }[];
   tenantId?: string;
   createdBy?: string;
-  status: "pending" | "active" | "close";
+  status: Status;
 }
 
 export interface ObjectiveCreationAttributes
@@ -30,7 +44,7 @@ class Objective
   public id!: number;
   public name!: string;
   public corporate!: string;
-  public routineType!: string;
+  public routineType!: RoutineType;
   public startDate!: Date;
   public endDate?: Date;
   public afterOccurrence!: number;
@@ -41,7 +55,7 @@ class Objective
   }[];
   public createdBy!: string;
   public tenantId!: string;
-  public status!: "pending" | "active" | "close";
+  public status!: Status;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -63,7 +77,13 @@ Objective.init(
       allowNull: false,
     },
     routineType: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(
+        RoutineType.ONCE,
+        RoutineType.MONTHLY,
+        RoutineType.QUARTERLY,
+        RoutineType.BI_ANNUALLY,
+        RoutineType.ANNUALLY
+      ),
       allowNull: false,
     },
     startDate: {
@@ -83,9 +103,9 @@ Objective.init(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("pending", "active", "close"),
+      type: DataTypes.ENUM(Status.PENDING, Status.ACTIVE, Status.CLOSE),
       allowNull: false,
-      defaultValue: "pending",
+      defaultValue: Status.PENDING,
     },
   },
   {

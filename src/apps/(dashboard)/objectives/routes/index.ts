@@ -1,19 +1,21 @@
+
 import { Router } from "express";
 
 import { bulkUpload } from "../../../storage/uploadMiddleware";
-import ObjectiveController from "../controllers";
+import ObjectivesController from "../controllers";
 
 const router = Router();
 
-router.get("/", ObjectiveController.list);
-router.post("/", ObjectiveController.create);
-router.get("/:id", ObjectiveController.retrieve);
-router.put("/:id", ObjectiveController.update);
-router.delete("/:id", ObjectiveController.destroy);
+router.get("/", ObjectivesController.list);
+router.post("/", ObjectivesController.create);
+router.get("/:id", ObjectivesController.retrieve);
+router.put("/:id", ObjectivesController.update);
+router.delete("/:id", ObjectivesController.destroy);
 router.post(
   "/bulk-upload",
   bulkUpload.single("file") as any,
-  ObjectiveController.bulkUpload
+  ObjectivesController.bulkUpload
 );
 
 export default router;
+

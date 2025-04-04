@@ -6,8 +6,6 @@ import User from "../users/models/user";
 import { findUserById } from "../users/services";
 import { verifyJwtToken } from "./services";
 
-
-
 export const authenticate = async (
   req: Request,
   res: Response,
@@ -21,7 +19,13 @@ export const authenticate = async (
 
     const gUser = await findUserById(decoded.userId);
 
-    if (!gUser) throw new Error("Invalid token or expired token");
+    if (!gUser)
+      return res.status(400).json(
+        customResponse({
+          message: "Invalid or expired token",
+          statusCode: 44,
+        })
+      );
 
     const TenantUser = getTenantModel(User, decoded.tenantId);
 

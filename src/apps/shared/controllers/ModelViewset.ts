@@ -120,7 +120,11 @@ class ModelViewSet<T extends Model> {
     const TenantModel = this.getTenantModel(req);
 
     await handleRequests({
-      promise: TenantModel.findAndCountAll({ limit: limitValue, offset }),
+      promise: TenantModel.findAndCountAll({
+        limit: limitValue,
+        offset,
+        order: [["createdAt", "ASC"]],
+      }),
       message: null,
       res,
       resData: (data: any) => {

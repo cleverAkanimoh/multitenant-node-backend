@@ -9,75 +9,67 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.ref_name }}
+      DEPLOY_HOST: ${{ github.ref == 'refs/heads/main' && secrets.HOST || secrets.STAGING_HOST }}
+      USE_NVM: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set USE_NVM Variable
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "USE_NVM=true" >> $GITHUB_ENV
-          else
-            echo "USE_NVM=false" >> $GITHUB_ENV
-          fi
-
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ env.DEPLOY_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRI_KEY }}
           script: |
             #!/bin/bash
             set -e
 
-            echo "Starting deployment on host '${{ secrets.HOST }}'"
+            echo "Starting deployment for branch '$BRANCH' on host '$DEPLOY_HOST'"
             echo "Current user: $(whoami)"
             echo "Home directory: $HOME"
             echo "Current directory: $(pwd)"
             echo "Shell: $SHELL"
             echo "PATH: $PATH"
 
-            # Set up Node environment based on USE_NVM flag
             if [ "$USE_NVM" == "true" ]; then
               echo "Using NVM for Node.js"
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
               [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+              nvm install node
               nvm use node
+              export PATH="$NVM_DIR/versions/node/$(nvm version)/bin:$PATH"
             else
               echo "Using system-installed Node.js"
               export PATH="/usr/bin:$PATH"
             fi
 
-            # Debug: Confirm versions and locations
-            echo "Node version: $(node -v)"
-            echo "Yarn location: $(which yarn) and version: $(yarn --version)"
-            echo "PM2 location: $(which pm2)"
+            echo "Node version: $(node -v || echo 'Node not found!')"
+            echo "Yarn version: $(yarn --version || echo 'Yarn not found!')"
+            echo "PM2 location: $(which pm2 || echo 'PM2 not found!')"
 
-            # Change to the app directory
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 
-            # Clean any local changes before pulling
             echo "Resetting any local changes..."
             git reset --hard HEAD
 
-            # Deploy code: checkout the correct branch and pull latest changes
-            echo "Deploying to branch: ${{ github.ref_name }}"
-            git checkout ${{ github.ref_name }}
-            git pull origin ${{ github.ref_name }}
+            echo "Deploying to branch: $BRANCH"
+            git checkout $BRANCH
+            git pull origin $BRANCH
 
-            # Ensure Yarn is available; if not, install it globally
-            yarn --version || npm install -g yarn
+            if ! yarn --version > /dev/null 2>&1; then
+              npm install -g yarn
+            fi
 
-            # Install dependencies
             echo "Installing dependencies"
             yarn install
 
-            # Build the app
             echo "Building the app"
             yarn build
-            
-            # Reload the app with PM2
+
             echo "Reloading the app with PM2"
-            pm2 reload my-app
+            pm2 reload my-app || pm2 start dist/index.js --name my-app

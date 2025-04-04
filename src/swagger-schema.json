@@ -1826,5 +1826,49 @@
       }
     }
   },
-  "definitions": {}
+  "definitions": {
+    "careerpath": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "educationalQualification": {
+          "type": "string"
+        },
+        "yearsOfExperience": {
+          "type": "string"
+        },
+        "minAge": {
+          "type": "string"
+        },
+        "maxAge": {
+          "type": "string"
+        },
+        "positionLifespan": {
+          "type": "string"
+        },
+        "slotsAvailable": {
+          "type": "string"
+        },
+        "annualPackage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "level",
+        "educationalQualification",
+        "yearsOfExperience",
+        "minAge",
+        "maxAge",
+        "positionLifespan",
+        "slotsAvailable",
+        "annualPackage"
+      ]
+    }
+  }
 }

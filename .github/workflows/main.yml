@@ -9,16 +9,16 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      BRANCH: ${{ github.ref_name }}
-      DEPLOY_HOST: ${{ github.ref == 'refs/heads/main' && secrets.HOST || secrets.STAGING_HOST }}
-      USE_NVM: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Deploy to Ubuntu Server
+      - name: Deploy to Production Server
+        if: github.ref == 'refs/heads/main'
+        env:
+          DEPLOY_HOST: ${{ secrets.HOST }}
+          BRANCH: "main"
+          USE_NVM: "true"
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.DEPLOY_HOST }}
@@ -27,7 +27,6 @@ jobs:
           script: |
             #!/bin/bash
             set -e
-
             echo "Starting deployment for branch '$BRANCH' on host '$DEPLOY_HOST'"
             echo "Current user: $(whoami)"
             echo "Home directory: $HOME"
@@ -35,22 +34,15 @@ jobs:
             echo "Shell: $SHELL"
             echo "PATH: $PATH"
 
+            # Set up Node environment using NVM
             if [ "$USE_NVM" == "true" ]; then
               echo "Using NVM for Node.js"
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
               [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-              nvm install node
-              nvm use node
-              export PATH="$NVM_DIR/versions/node/$(nvm version)/bin:$PATH"
-            else
-              echo "Using system-installed Node.js"
-              export PATH="/usr/bin:$PATH"
+              nvm use default || nvm use node || echo "Node already active"
+              echo "Node version (via NVM): $(node -v)"
             fi
-
-            echo "Node version: $(node -v || echo 'Node not found!')"
-            echo "Yarn version: $(yarn --version || echo 'Yarn not found!')"
-            echo "PM2 location: $(which pm2 || echo 'PM2 not found!')"
 
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 
@@ -61,9 +53,7 @@ jobs:
             git checkout $BRANCH
             git pull origin $BRANCH
 
-            if ! yarn --version > /dev/null 2>&1; then
-              npm install -g yarn
-            fi
+            yarn --version || npm install -g yarn
 
             echo "Installing dependencies"
             yarn install
@@ -72,4 +62,52 @@ jobs:
             yarn build
 
             echo "Reloading the app with PM2"
-            pm2 reload my-app || pm2 start dist/index.js --name my-app
+            pm2 reload my-app
+
+      - name: Deploy to Staging Server
+        if: github.ref == 'refs/heads/staging'
+        env:
+          DEPLOY_HOST: ${{ secrets.STAGING_HOST }}
+          BRANCH: "staging"
+          USE_NVM: "false"
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRI_KEY }}
+          script: |
+            #!/bin/bash
+            set -e
+            echo "Starting deployment for branch '$BRANCH' on host '$DEPLOY_HOST'"
+            echo "Current user: $(whoami)"
+            echo "Home directory: $HOME"
+            echo "Current directory: $(pwd)"
+            echo "Shell: $SHELL"
+            echo "PATH: $PATH"
+
+            # Use system-installed Node.js
+            if [ "$USE_NVM" == "false" ]; then
+              echo "Using system-installed Node.js"
+              export PATH="/usr/bin:$PATH"
+              echo "Node version (system): $(node -v)"
+            fi
+
+            cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
+
+            echo "Resetting any local changes..."
+            git reset --hard HEAD
+
+            echo "Deploying to branch: $BRANCH"
+            git checkout $BRANCH
+            git pull origin $BRANCH
+
+            yarn --version || npm install -g yarn
+
+            echo "Installing dependencies"
+            yarn install
+
+            echo "Building the app"
+            yarn build
+
+            echo "Reloading the app with PM2"
+            pm2 reload my-app

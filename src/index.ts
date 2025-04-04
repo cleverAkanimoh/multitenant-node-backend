@@ -40,7 +40,8 @@ const PORT = process.env.PORT;
     debugLog("✅ Database connected successfully.");
 
     await syncSchemas();
-
+    // if (process.env.NODE_ENV === "development") {
+    // }
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);
     });

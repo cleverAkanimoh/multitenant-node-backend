@@ -63,6 +63,10 @@ Organization.init(
       type: DataTypes.STRING,
       primaryKey: true,
     },
+    logo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: true,

@@ -2,16 +2,36 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../../../core/orm";
 import Organization from "../../organization/models";
 
+export enum RoutineType {
+  ONCE = "once",
+  MONTHLY = "monthly",
+  QUARTERLY = "quarterly",
+  BI_ANNUALLY = "bi-Annually",
+  ANNUALLY = "annually",
+}
+
+export enum Status {
+  PENDING = "pending",
+  ACTIVE = "active",
+  CLOSE = "close",
+}
+
 export interface ObjectiveAttributes {
   id: number;
   name: string;
   corporate: string;
-  routineType: string;
+  routineType: RoutineType;
   startDate: Date;
   endDate?: Date;
   afterOccurrence: number;
-  perspectiveNames: string;
-  perspectiveRelativePoints: string;
+  perspectives: {
+    id: number;
+    name: string;
+    relativePoint: number;
+  }[];
+  tenantId?: string;
+  createdBy?: string;
+  status: Status;
 }
 
 export interface ObjectiveCreationAttributes
@@ -24,12 +44,18 @@ class Objective
   public id!: number;
   public name!: string;
   public corporate!: string;
-  public routineType!: string;
+  public routineType!: RoutineType;
   public startDate!: Date;
   public endDate?: Date;
   public afterOccurrence!: number;
-  public perspectiveNames!: string;
-  public perspectiveRelativePoints!: string;
+  public perspectives!: {
+    id: number;
+    name: string;
+    relativePoint: number;
+  }[];
+  public createdBy!: string;
+  public tenantId!: string;
+  public status!: Status;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -51,7 +77,13 @@ Objective.init(
       allowNull: false,
     },
     routineType: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(
+        RoutineType.ONCE,
+        RoutineType.MONTHLY,
+        RoutineType.QUARTERLY,
+        RoutineType.BI_ANNUALLY,
+        RoutineType.ANNUALLY
+      ),
       allowNull: false,
     },
     startDate: {
@@ -66,13 +98,14 @@ Objective.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    perspectiveNames: {
-      type: DataTypes.STRING,
+    perspectives: {
+      type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false,
     },
-    perspectiveRelativePoints: {
-      type: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM(Status.PENDING, Status.ACTIVE, Status.CLOSE),
       allowNull: false,
+      defaultValue: Status.PENDING,
     },
   },
   {

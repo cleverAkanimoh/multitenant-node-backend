@@ -34,15 +34,17 @@ jobs:
             echo "Shell: $SHELL"
             echo "PATH: $PATH"
            
-            # Ensure NVM and Node.js are correctly loaded
-            if [ "$USE_NVM" == "true" ]; then
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-              [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-              export PATH="$NVM_DIR/versions/node/$(ls $NVM_DIR/versions/node)/bin:$PATH"
-            else
-              export PATH="/usr/bin:$PATH"  # Use system-installed Node.js on staging
-            fi
+            # Load NVM and set PATH correctly
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+            
+            export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
+            
+            # Debugging: Print node, yarn, and pm2 paths
+            which node
+            which yarn
+            which pm2
 
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 

@@ -39,9 +39,9 @@ const PORT = process.env.PORT;
     await sequelize.authenticate();
     debugLog("✅ Database connected successfully.");
 
-    if (process.env.NODE_ENV === "development") {
-      await syncSchemas();
-    }
+    await syncSchemas();
+    // if (process.env.NODE_ENV === "development") {
+    // }
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);
     });

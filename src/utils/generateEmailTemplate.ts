@@ -125,8 +125,28 @@ export const generateEmailTemplate = ({
       <div class="content">
         <h2>${title}</h2>
         <p>${message}</p>
-        <a href="${buttonLink}" class="buttonLink">${buttonText}</a> <br />
-        <a href="${buttonLink}">${buttonLink}</a>
+        <a 
+          href="${buttonLink}" 
+          style="
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #0b3178;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+          "
+        >
+          ${buttonText}
+        </a>
+        <p style="margin-top: 10px; font-size: 14px; color: #666;">
+            Or copy and paste this URL into your browser:
+            <br />
+            <a href="${buttonLink}" style="color: #0b3178; text-decoration: underline;">${buttonLink}</a>
+          </p>
         
         <p class="note">If you didn't request this, please ignore this email.</p>
       </div>

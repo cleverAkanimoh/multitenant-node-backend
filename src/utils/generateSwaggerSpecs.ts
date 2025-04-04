@@ -2,62 +2,169 @@ import fs from "fs";
 import Joi from "joi";
 import path from "path";
 import * as ts from "typescript";
-import { debugLog } from "./debugLog";
+import { baseUrl, docTitle } from "../core/configs";
 
-const BASE_DIR = path.join(__dirname, "..", "apps");
-const SWAGGER_SCHEMA_FILE = path.join(__dirname, "..", "swagger-schema.json");
+const baseSwagger = {
+  swagger: "2.0",
+  info: {
+    title: docTitle,
+    version: "1.0.0",
+    description: "API documentation for E-metrics Suite",
+  },
+  host: baseUrl,
+  basePath: "/",
+  schemes: ["http"],
+  securityDefinitions: {
+    BearerAuth: {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      description:
+        "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+    },
+  },
+  paths: {} as Record<string, any>,
+  definitions: {} as Record<string, any>,
+};
 
-const swaggerSchemas: Record<string, any> = {};
+const APPS_DIR = path.join(__dirname, "..", "apps");
+const OUTPUT_FILE = path.join(__dirname, "..", "swagger-schema.json");
 
 /**
- * Recursively scan all folders inside "src/apps" to find routes.ts and controllers.
+ * Recursively scan the apps directory for route files.
+ * Only process files named "routes.ts" or "index.ts" when found in a folder with "routes" in its path.
  */
-export const scanFiles = (dir: string) => {
-  fs.readdirSync(dir, { withFileTypes: true }).forEach((file) => {
-    const fullPath = path.join(dir, file.name);
-
-    if (file.isDirectory()) {
+function scanFiles(dir: string) {
+  fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
       scanFiles(fullPath);
-    } else if (file.name === "routes.ts" || file.name === "index.ts") {
+    } else if (
+      entry.name === "routes.ts" ||
+      (entry.name === "index.ts" && dir.toLowerCase().includes("routes"))
+    ) {
       console.log(`📂 Found Route File: ${fullPath}`);
       processRouteFile(fullPath);
     }
   });
-};
+}
 
 /**
- * Process a routes.ts or routes/index.ts file to find associated controllers and schemas.
+ * Extract a route prefix from the route file location.
+ * For example, if the file is in "apps/appName/subfolder/routes/index.ts",
+ * the prefix will be "/subfolder".
  */
-const processRouteFile = (filePath: string) => {
-  const content = fs.readFileSync(filePath, "utf-8");
-  const importRegex = /import\s+\{?([^}]+)\}?\s+from\s+["'](.+)["']/g;
-  const routeGroup = path.basename(path.dirname(filePath));
+function getRoutePrefix(filePath: string): string {
+  const appBase = findAppBase(filePath);
+  const dirOfRoute = path.dirname(filePath);
+  let appDir = path.basename(appBase);
+  let relativeDir = path.relative(appBase, dirOfRoute);
+  console.log(`📂 Relative Dir: ${relativeDir || "/"},  appDir: ${appDir}`);
 
-  let match;
-  while ((match = importRegex.exec(content)) !== null) {
-    const importPath = match[2];
+  appDir = appDir.replace(/authentication/gi, "auth");
+  appDir = appDir.replace(/[()]/g, "");
+  relativeDir = relativeDir.replace(/routes/gi, "");
+  relativeDir = relativeDir.split(path.sep).filter(Boolean).join("/");
 
-    // Skip non-relative imports
-    if (!importPath.startsWith(".")) continue;
+  // Prefix with the appDir
+  return relativeDir ? `/${appDir}/${relativeDir}` : `/${appDir}`;
+}
 
-    const absImportPath = path.resolve(
-      path.dirname(filePath),
-      importPath + ".ts"
+function processRouteFile(filePath: string) {
+  const routeGroup = path.basename(findAppBase(filePath));
+  const prefix = getRoutePrefix(filePath);
+  extractRoutesFromFile(filePath, prefix);
+  // Then, try to locate the controllers for this app.
+  const appBase = findAppBase(filePath);
+  const controllerPath = findControllerFile(appBase);
+  if (controllerPath) {
+    console.log(
+      `🔍 Found controllers at ${controllerPath} for group ${routeGroup}`
     );
+    extractJoiSchemasFromController(controllerPath, routeGroup);
+  } else {
+    console.warn(`⚠️ No controllers found for group ${routeGroup}`);
+  }
+}
 
-    if (fs.existsSync(absImportPath)) {
-      debugLog(`📂 Found Controller File: ${absImportPath}`);
-      extractJoiSchemas(absImportPath, routeGroup);
+/**
+ * Given a route file path, determine the app base folder.
+ * Assumes the app folder is a direct child of APPS_DIR.
+ */
+function findAppBase(filePath: string): string {
+  const relative = path.relative(APPS_DIR, filePath);
+  const parts = relative.split(path.sep);
+  return path.join(APPS_DIR, parts[0]);
+}
+
+/**
+ * Recursively search for controllers/index.ts starting from a given root.
+ */
+function findControllerFile(root: string): string | null {
+  const entries = fs.readdirSync(root, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name.toLowerCase() === "controllers") {
+        const candidate = path.join(fullPath, "index.ts");
+        if (fs.existsSync(candidate)) return candidate;
+      }
+      const found = findControllerFile(fullPath);
+      if (found) return found;
     }
   }
-};
+  return null;
+}
 
 /**
- * Extract Joi Schemas from controller files
+ * Extract route endpoints from a routes file.
+ * Looks for patterns like router.get('/path', ...), router.post("/path", ...), etc.
  */
-const extractJoiSchemas = (controllerPath: string, routeGroup: string) => {
-  console.log(`📄 Checking controller: ${controllerPath}`);
+function extractRoutesFromFile(filePath: string, parentPrefix: string) {
+  const content = fs.readFileSync(filePath, "utf-8");
+  const routeRegex =
+    /router\.(get|post|put|delete|patch)\(\s*['"]([^'"]+)['"]/gi;
+  let match: RegExpExecArray | null;
+  while ((match = routeRegex.exec(content)) !== null) {
+    const method = match[1].toLowerCase();
+    const routePath = match[2];
+    // Combine the parent's prefix with the route path
+    const fullPath = path.posix.join(parentPrefix, routePath);
+    if (!baseSwagger.paths[fullPath]) {
+      baseSwagger.paths[fullPath] = {};
+    }
+    // Add a basic endpoint description.
+    baseSwagger.paths[fullPath][method] = {
+      description: "",
+      parameters:
+        method === "get"
+          ? []
+          : [
+              {
+                name: "body",
+                in: "body",
+                schema: {
+                  type: "object",
+                  properties: {},
+                },
+              },
+            ],
+      responses: {
+        "400": { description: "Bad Request" },
+      },
+    };
+    console.log(`🟢 Extracted route: [${method.toUpperCase()}] ${fullPath}`);
+  }
+}
 
+/**
+ * Extract Joi schemas from a controller file.
+ */
+function extractJoiSchemasFromController(
+  controllerPath: string,
+  routeGroup: string
+) {
+  console.log(`🔍 Scanning Controller: ${controllerPath}`);
   const content = fs.readFileSync(controllerPath, "utf-8");
   const sourceFile = ts.createSourceFile(
     controllerPath,
@@ -65,7 +172,6 @@ const extractJoiSchemas = (controllerPath: string, routeGroup: string) => {
     ts.ScriptTarget.ESNext,
     true
   );
-
   const schemas: Record<string, any> = {};
 
   sourceFile.forEachChild((node) => {
@@ -76,20 +182,17 @@ const extractJoiSchemas = (controllerPath: string, routeGroup: string) => {
           declaration.name.text.endsWith("Schema")
         ) {
           const schemaName = declaration.name.text;
-          const schemaCode = content.substring(node.pos, node.end);
-          debugLog(`📄 Extracted schema code: ${schemaCode}`);
-
           try {
-            // Dynamically load the file and extract the schema
+            // Dynamically load the module.
             const controllerModule = require(controllerPath);
-            const joiObject = controllerModule[schemaName];
-
-            if (Joi.isSchema(joiObject)) {
-              schemas[schemaName] = joiObject.describe();
+            const joiSchema = controllerModule[schemaName];
+            if (Joi.isSchema(joiSchema)) {
+              schemas[schemaName] = joiSchema.describe();
+              console.log(`🟢 Extracted schema: ${schemaName}`);
             }
           } catch (error) {
             console.error(
-              `❌ Failed to parse schema in ${controllerPath}:`,
+              `❌ Error extracting schema "${schemaName}" from ${controllerPath}:`,
               error
             );
           }
@@ -99,23 +202,19 @@ const extractJoiSchemas = (controllerPath: string, routeGroup: string) => {
   });
 
   if (Object.keys(schemas).length > 0) {
-    swaggerSchemas[routeGroup] = {
-      ...(swaggerSchemas[routeGroup] || {}),
+    baseSwagger.definitions[routeGroup] = {
+      ...(baseSwagger.definitions[routeGroup] || {}),
       ...schemas,
     };
   }
-};
+}
 
-/**
- * Write collected schema data into swagger-schema.json
- */
-export const generateSwaggerSchema = () => {
-  scanFiles(BASE_DIR);
-  fs.writeFileSync(
-    SWAGGER_SCHEMA_FILE,
-    JSON.stringify(swaggerSchemas, null, 2)
-  );
-  console.log(`✅ Swagger Schema saved at ${SWAGGER_SCHEMA_FILE}`);
-};
-scanFiles(BASE_DIR);
-// generateSwaggerSchema();
+export default function autoGenerateSwaggerSpecs() {
+  console.log(`🔍 Scanning apps directory: ${APPS_DIR}`);
+  scanFiles(APPS_DIR);
+
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(baseSwagger, null, 2));
+  console.log(`✅ Swagger schema saved at ${OUTPUT_FILE}`);
+}
+
+autoGenerateSwaggerSpecs();

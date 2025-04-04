@@ -6,15 +6,7 @@ import User from "../users/models/user";
 import { findUserById } from "../users/services";
 import { verifyJwtToken } from "./services";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: User | undefined;
-      organization: string;
-      tenantUserModel?: User;
-    }
-  }
-}
+
 
 export const authenticate = async (
   req: Request,

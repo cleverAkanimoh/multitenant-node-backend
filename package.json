@@ -5,10 +5,11 @@
   "license": "MIT",
   "description": "Express backend with multi-tenancy, REST APIs, and TypeScript",
   "scripts": {
-    "dev": "nodemon",
-    "build": "tsc",
-    "generate-model": "ts-node generateModel.ts filedir filename ",
-    "start": "node dist/index.js"
+    "dev": "ts-node ./src/utils/generateSwaggerSpecs.ts && nodemon ",
+    "start": "node dist/index.js",
+    "build": "ts-node ./src/utils/generateSwaggerSpecs.ts && tsc",
+    "generate-model": "ts-node generateModel.ts filedir filename",
+    "generate-swagger": "ts-node ./src/utils/generateSwaggerSpecs.ts "
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.8",
@@ -53,7 +54,6 @@
     "pg-hstore": "^2.3.4",
     "qrcode": "^1.5.4",
     "redis": "^4.7.0",
-    "redoc-express": "^2.1.0",
     "sequelize": "^6.37.6",
     "socket.io": "^4.8.1",
     "speakeasy": "^2.0.0",

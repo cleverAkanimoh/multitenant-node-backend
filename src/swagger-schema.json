@@ -2134,6 +2134,9 @@
     "objective": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "number"
+        },
         "name": {
           "type": "string"
         },
@@ -2152,10 +2155,16 @@
         "afterOccurrence": {
           "type": "number"
         },
-        "perspectiveNames": {
+        "perspectives": {
+          "type": "array"
+        },
+        "tenantId": {
           "type": "string"
         },
-        "perspectiveRelativePoints": {
+        "createdBy": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       },
@@ -2165,8 +2174,7 @@
         "routineType",
         "startDate",
         "afterOccurrence",
-        "perspectiveNames",
-        "perspectiveRelativePoints"
+        "perspectives"
       ]
     },
     "company": {

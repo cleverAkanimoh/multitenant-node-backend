@@ -10,8 +10,14 @@ export interface ObjectiveAttributes {
   startDate: Date;
   endDate?: Date;
   afterOccurrence: number;
-  perspectiveNames: string;
-  perspectiveRelativePoints: string;
+  perspectives: {
+    id: number;
+    name: string;
+    relativePoint: number;
+  }[];
+  tenantId?: string;
+  createdBy?: string;
+  status: "pending" | "active" | "close";
 }
 
 export interface ObjectiveCreationAttributes
@@ -28,8 +34,14 @@ class Objective
   public startDate!: Date;
   public endDate?: Date;
   public afterOccurrence!: number;
-  public perspectiveNames!: string;
-  public perspectiveRelativePoints!: string;
+  public perspectives!: {
+    id: number;
+    name: string;
+    relativePoint: number;
+  }[];
+  public createdBy!: string;
+  public tenantId!: string;
+  public status!: "pending" | "active" | "close";
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -66,13 +78,14 @@ Objective.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    perspectiveNames: {
-      type: DataTypes.STRING,
+    perspectives: {
+      type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false,
     },
-    perspectiveRelativePoints: {
-      type: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM("pending", "active", "close"),
       allowNull: false,
+      defaultValue: "pending",
     },
   },
   {

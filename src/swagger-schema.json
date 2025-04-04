@@ -1,10 +1,11 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Emetrics Suite API Documentation",
+    "title": "API documentation for E-metrics Suite",
     "version": "1.0.0",
     "description": "API documentation for E-metrics Suite"
   },
+  "host": "localhost:8000",
   "basePath": "/",
   "schemes": [
     "http"
@@ -20,1192 +21,1810 @@
   "paths": {
     "/dashboard/careerpath/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/careerpath"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/careerpath/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/careerpath"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/careerpath"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/careerpath/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/careerpath"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/designations/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/designations"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/designations/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/designations"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/designations"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/designations/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/designations"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/kpis/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/kpis"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/kpis/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/kpis"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/kpis"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/kpis/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/kpis"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/objectives/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/objectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/objectives/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/objectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/objectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/objectives/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/objectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/organization/current": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/organization/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/organization"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/organization/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/organization"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/organization"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/payroll/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/payroll"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/payroll/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/payroll"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/payroll"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/payroll/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/payroll"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/people/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/people"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/people/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/people"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/people"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/people/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/people"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/perspectives/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/perspectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/perspectives/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/perspectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/perspectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/perspectives/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/perspectives"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/tasks/": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/tasks"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/tasks/:id": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "put": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to put data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/tasks"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       },
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/tasks"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
     "/dashboard/tasks/bulk-upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/tasks"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/register": {
+    "auth/register": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/login": {
+    "auth/login": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/logout": {
+    "auth/logout": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/current-user": {
+    "auth/current-user": {
       "get": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to get data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/delete-user": {
+    "auth/delete-user": {
       "delete": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to delete data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/deactivate-user": {
+    "auth/deactivate-user": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/verify-account": {
+    "auth/verify-account": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/forgot-password": {
+    "auth/forgot-password": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/reset-password": {
+    "auth/reset-password": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/change-password": {
+    "auth/change-password": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/enable-mfa": {
+    "auth/enable-mfa": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/auth/verify-mfa": {
+    "auth/verify-mfa": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for auth. You can use it to create, read, update, or delete auth records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/auth"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/storage/upload": {
+    "storage/upload": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for storage. You can use it to create, read, update, or delete storage records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/storage"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/storage/delete": {
+    "storage/delete": {
       "post": {
-        "description": "",
+        "summary": "",
+        "description": "This endpoint allows you to post data for storage. You can use it to create, read, update, or delete storage records.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/storage"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     }
   },
-  "definitions": {
-    "(dashboard)": {
-      "CareerPathSchema": {
-        "type": "object",
-        "keys": {
-          "name": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "level": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "educationalQualification": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "yearsOfExperience": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "minAge": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "maxAge": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "positionLifespan": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "slotsAvailable": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          },
-          "annualPackage": {
-            "type": "string",
-            "flags": {
-              "presence": "required"
-            }
-          }
-        }
-      }
-    }
-  }
+  "definitions": {}
 }

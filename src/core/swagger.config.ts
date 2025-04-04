@@ -5,9 +5,10 @@ import { debugLog } from "../utils/debugLog";
 import { baseUrl } from "./configs";
 
 import swaggerSpecs from "../swagger-schema.json";
+import autoGenerateSwaggerSpecs from "../utils/generateSwaggerSpecs";
 
 export const setupSwagger = async (app: Express) => {
-  // autoGenerateSwaggerSpecs();
+  autoGenerateSwaggerSpecs();
 
   app.use(
     "/docs",

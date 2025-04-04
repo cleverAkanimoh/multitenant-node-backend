@@ -10,7 +10,7 @@ export enum StructureLevel {
   UNIT = "unit",
 }
 
-export interface CompanyAttributes {
+export interface OrganizationAttributes {
   id: string;
   name?: string;
   shortName?: string;
@@ -29,12 +29,12 @@ export interface CompanyAttributes {
   ownerId?: string;
 }
 
-export interface CompanyCreationAttributes
-  extends Optional<CompanyAttributes, "id"> {}
+export interface OrganizationCreationAttributes
+  extends Optional<OrganizationAttributes, "id"> {}
 
-class Company
-  extends Model<CompanyAttributes, CompanyCreationAttributes>
-  implements CompanyAttributes
+class Organization
+  extends Model<OrganizationAttributes, OrganizationCreationAttributes>
+  implements OrganizationAttributes
 {
   public id!: string;
   public name?: string;
@@ -57,7 +57,7 @@ class Company
   public readonly updatedAt!: Date;
 }
 
-Company.init(
+Organization.init(
   {
     id: {
       type: DataTypes.STRING,
@@ -124,13 +124,13 @@ Company.init(
   },
   {
     sequelize,
-    tableName: "companies",
-    modelName: "Company",
+    tableName: "organizations",
+    modelName: "Organization",
     timestamps: true,
   }
 );
 
-Company.hasMany(User, {
+Organization.hasMany(User, {
   foreignKey: {
     name: "tenantId",
     allowNull: false,
@@ -140,9 +140,9 @@ Company.hasMany(User, {
   onUpdate: "CASCADE",
 });
 
-User.belongsTo(Company, {
+User.belongsTo(Organization, {
   foreignKey: { name: "tenantId", allowNull: false },
-  as: "company",
+  as: "organization",
 });
 
-export default Company;
+export default Organization;

@@ -4,6 +4,7 @@ import express from "express";
 
 import { createServer } from "http";
 import corsSetup from "./core/corsSetup";
+import { syncSchemas } from "./core/multitenancy";
 import sequelize from "./core/orm";
 import { setupWebSocketServer } from "./core/websocket";
 import { configureMiddleware } from "./middlewares";
@@ -38,7 +39,7 @@ const PORT = process.env.PORT;
     await sequelize.authenticate();
     debugLog("✅ Database connected successfully.");
 
-    // await syncSchemas();
+    await syncSchemas();
 
     server.listen(PORT, () => {
       debugLog(`Server running on port ${PORT}`);

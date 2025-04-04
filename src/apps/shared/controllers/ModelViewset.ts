@@ -42,7 +42,7 @@ class ModelViewSet<T extends Model> {
 
   private getTenantModel(req: Request) {
     return this.isTenantModel
-      ? getTenantModel(this.model, req.company)
+      ? getTenantModel(this.model, req.organization)
       : this.model;
   }
 
@@ -69,7 +69,7 @@ class ModelViewSet<T extends Model> {
   current = async (req: Request, res: Response) => {
     const TenantModel = this.getTenantModel(req);
     return handleRequests({
-      promise: TenantModel.findByPk(req.company),
+      promise: TenantModel.findByPk(req.organization),
       message: null,
       res,
     });
@@ -223,7 +223,7 @@ class ModelViewSet<T extends Model> {
 
       if (this.schema) {
         for (const record of data) {
-          record.tenantId = req.company;
+          record.tenantId = req.organization;
           record.createdBy = (req.user as { email: string })?.email;
           if (record.name) {
             record.name = record.name.toLowerCase();

@@ -118,7 +118,7 @@ export const registerUser = async (
     ? createAdmin(req.body)
     : createStaff(req.body);
 
-  const checkUserType = isSuperAdmin ? "Company" : isHr ? "Hr" : "Staff";
+  const checkUserType = isSuperAdmin ? "Organization" : isHr ? "Hr" : "Staff";
 
   return handleRequests({
     promise: checkUserRole,

@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from "sequelize";
-import Company from "../../(dashboard)/company/models";
+import Organization from "../../(dashboard)/organization/models";
 import sequelize from "../../../core/orm";
 
 export enum Roles {
@@ -7,7 +7,6 @@ export enum Roles {
   ADMIN = "hr",
   SUPERADMIN = "employer",
   TEAMLEAD = "team lead",
-  
 }
 
 export interface UserAttributes {
@@ -102,7 +101,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       references: {
-        model: Company,
+        model: Organization,
         key: "id",
       },
       onDelete: "CASCADE",

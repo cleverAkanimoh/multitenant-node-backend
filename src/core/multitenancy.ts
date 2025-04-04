@@ -1,6 +1,13 @@
 import { QueryTypes } from "sequelize";
-import Company from "../apps/(dashboard)/company/models";
+import CareerPath from "../apps/(dashboard)/careerpath/models";
+import Designations from "../apps/(dashboard)/designations/models";
+import KPIs from "../apps/(dashboard)/kpis/models";
+import Objective from "../apps/(dashboard)/objectives/models";
+import Organization from "../apps/(dashboard)/organization/models";
+import Payroll from "../apps/(dashboard)/payroll/models";
+import People from "../apps/(dashboard)/people/models";
 import Perspective from "../apps/(dashboard)/perspectives/models";
+import Tasks from "../apps/(dashboard)/tasks/models";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
 import sequelize from "./orm";
@@ -37,17 +44,15 @@ export const deleteTenantSchema = async (tenantId: string) => {
   await sequelize.query(`DROP SCHEMA IF EXISTS "${tenantId}" CASCADE;`);
 };
 
-// Function to sync schemas
 export async function syncSchemas() {
   try {
     debugLog("Synchronizing Public Schema(s)");
 
-    const modelsToSync = [User, Company];
+    await Organization.sync({ alter: true });
+    debugLog(`✅ Organization synchronized.`);
 
-    for (const model of modelsToSync) {
-      await model.sync({ alter: true });
-      debugLog(`✅ ${model.name} synchronized.`);
-    }
+    await User.sync({ alter: true });
+    debugLog(`✅ User synchronized.`);
 
     const tenantSchemas = await getTenantSchemas();
 
@@ -56,8 +61,27 @@ export async function syncSchemas() {
 
       const TenantUser = getTenantModel(User, schema);
       const TenantPerspective = getTenantModel(Perspective, schema);
+      const TenantObjective = getTenantModel(Objective, schema);
+      const TenantKPIs = getTenantModel(KPIs, schema);
+      const TenantTasks = getTenantModel(Tasks, schema);
+      const TenantPayroll = getTenantModel(Payroll, schema);
+      const TenantPeople = getTenantModel(People, schema);
+      const TenantDesignations = getTenantModel(Designations, schema);
+      const TenantCareerPath = getTenantModel(CareerPath, schema);
 
-      const modelsToSync = [User, Company, TenantUser, TenantPerspective];
+      const modelsToSync = [
+        // User,
+        // Organization,
+        TenantUser,
+        TenantPerspective,
+        TenantObjective,
+        TenantKPIs,
+        TenantTasks,
+        TenantPayroll,
+        TenantPeople,
+        TenantDesignations,
+        TenantCareerPath,
+      ];
 
       for (const model of modelsToSync) {
         await model.sync({ alter: true });
@@ -65,6 +89,6 @@ export async function syncSchemas() {
       }
     }
   } catch (error) {
-    debugLog("❌ Error syncing tenant schemas:", error);
+    debugLog("❌ Error syncing schemas:", error);
   }
 }

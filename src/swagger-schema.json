@@ -23,7 +23,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for careerpath. You can use it to create, read, update, or delete careerpath records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -72,7 +80,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for careerpath. You can use it to create, read, update, or delete careerpath records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -92,6 +108,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -121,12 +143,10 @@
         "description": "This endpoint allows you to delete data for careerpath. You can use it to create, read, update, or delete careerpath records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/careerpath"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -179,7 +199,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for designations. You can use it to create, read, update, or delete designations records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -228,7 +256,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for designations. You can use it to create, read, update, or delete designations records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -248,6 +284,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -277,12 +319,10 @@
         "description": "This endpoint allows you to delete data for designations. You can use it to create, read, update, or delete designations records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/designations"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -335,7 +375,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for kpis. You can use it to create, read, update, or delete kpis records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -384,7 +432,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for kpis. You can use it to create, read, update, or delete kpis records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -404,6 +460,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -433,12 +495,10 @@
         "description": "This endpoint allows you to delete data for kpis. You can use it to create, read, update, or delete kpis records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/kpis"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -491,7 +551,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for objectives. You can use it to create, read, update, or delete objectives records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -540,7 +608,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for objectives. You can use it to create, read, update, or delete objectives records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -560,6 +636,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -589,12 +671,10 @@
         "description": "This endpoint allows you to delete data for objectives. You can use it to create, read, update, or delete objectives records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/objectives"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -647,7 +727,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -668,7 +756,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -717,7 +813,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for organization. You can use it to create, read, update, or delete organization records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -737,6 +841,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -766,12 +876,10 @@
         "description": "This endpoint allows you to delete data for organization. You can use it to create, read, update, or delete organization records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/organization"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -794,7 +902,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for payroll. You can use it to create, read, update, or delete payroll records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -843,7 +959,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for payroll. You can use it to create, read, update, or delete payroll records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -863,6 +987,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -892,12 +1022,10 @@
         "description": "This endpoint allows you to delete data for payroll. You can use it to create, read, update, or delete payroll records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/payroll"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -950,7 +1078,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for people. You can use it to create, read, update, or delete people records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -999,7 +1135,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for people. You can use it to create, read, update, or delete people records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1019,6 +1163,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1048,12 +1198,10 @@
         "description": "This endpoint allows you to delete data for people. You can use it to create, read, update, or delete people records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/people"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -1106,7 +1254,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for perspectives. You can use it to create, read, update, or delete perspectives records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1155,7 +1311,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for perspectives. You can use it to create, read, update, or delete perspectives records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1175,6 +1339,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1204,12 +1374,10 @@
         "description": "This endpoint allows you to delete data for perspectives. You can use it to create, read, update, or delete perspectives records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/perspectives"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -1262,7 +1430,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for tasks. You can use it to create, read, update, or delete tasks records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1311,7 +1487,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for tasks. You can use it to create, read, update, or delete tasks records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1331,6 +1515,12 @@
         "summary": "",
         "description": "This endpoint allows you to put data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1360,12 +1550,10 @@
         "description": "This endpoint allows you to delete data for tasks. You can use it to create, read, update, or delete tasks records.",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/tasks"
-            }
+            "type": "string"
           }
         ],
         "responses": {
@@ -1508,7 +1696,15 @@
       "get": {
         "summary": "",
         "description": "This endpoint allows you to get data for auth. You can use it to create, read, update, or delete auth records.",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Optional search query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1529,16 +1725,7 @@
       "delete": {
         "summary": "",
         "description": "This endpoint allows you to delete data for auth. You can use it to create, read, update, or delete auth records.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/auth"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
@@ -1868,6 +2055,482 @@
         "positionLifespan",
         "slotsAvailable",
         "annualPackage"
+      ]
+    },
+    "designations": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "corporate": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "corporate",
+        "division",
+        "group",
+        "department",
+        "unit"
+      ]
+    },
+    "kpi": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "uplineObjective": {
+          "type": "string"
+        },
+        "uplineInitiative": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "ownersEmail": {
+          "type": "string"
+        },
+        "routineType": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "afterOccurrence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "uplineObjective",
+        "uplineInitiative",
+        "createdBy",
+        "ownersEmail",
+        "routineType",
+        "startDate",
+        "endDate",
+        "afterOccurrence"
+      ]
+    },
+    "objective": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "corporate": {
+          "type": "string"
+        },
+        "routineType": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "afterOccurrence": {
+          "type": "number"
+        },
+        "perspectiveNames": {
+          "type": "string"
+        },
+        "perspectiveRelativePoints": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "corporate",
+        "routineType",
+        "startDate",
+        "afterOccurrence",
+        "perspectiveNames",
+        "perspectiveRelativePoints"
+      ]
+    },
+    "company": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "shortName": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "primaryTimezone": {
+          "type": "string"
+        },
+        "otherTimezones": {
+          "type": "array"
+        },
+        "primaryDateFormat": {
+          "type": "string"
+        },
+        "otherDateFormats": {
+          "type": "array"
+        },
+        "workDays": {
+          "type": "array"
+        },
+        "workTimeRange": {
+          "type": "object"
+        },
+        "breakTimeRange": {
+          "type": "object"
+        },
+        "structureLevel": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "primaryTimezone",
+        "primaryDateFormat",
+        "workTimeRange",
+        "breakTimeRange"
+      ]
+    },
+    "payroll": {
+      "type": "object",
+      "properties": {
+        "gradelevel": {
+          "type": "string"
+        },
+        "structuretype": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "string"
+        },
+        "numberofwork": {
+          "type": "string"
+        },
+        "grossmoney": {
+          "type": "string"
+        },
+        "otherreceivableselement": {
+          "type": "string"
+        },
+        "otherreceivableselementgrosspercent": {
+          "type": "string"
+        },
+        "fixedreceivableselement": {
+          "type": "string"
+        },
+        "fixedreceivableselementgrosspercent": {
+          "type": "string"
+        },
+        "regulatoryreceivables": {
+          "type": "string"
+        },
+        "regulatoryrates": {
+          "type": "string"
+        },
+        "regulatoryreceivablesgrosspercent": {
+          "type": "string"
+        },
+        "regulatorydeductables": {
+          "type": "string"
+        },
+        "regulatorydeductablesgrosspercent": {
+          "type": "string"
+        },
+        "otherdeductables": {
+          "type": "string"
+        },
+        "otherdeductablesgrosspercent": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "gradelevel",
+        "structuretype",
+        "rate",
+        "numberofwork",
+        "grossmoney",
+        "otherreceivableselement",
+        "otherreceivableselementgrosspercent",
+        "fixedreceivableselement",
+        "fixedreceivableselementgrosspercent",
+        "regulatoryreceivables",
+        "regulatoryrates",
+        "regulatoryreceivablesgrosspercent",
+        "regulatorydeductables",
+        "regulatorydeductablesgrosspercent",
+        "otherdeductables",
+        "otherdeductablesgrosspercent"
+      ]
+    },
+    "people": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "officialEmail": {
+          "type": "string"
+        },
+        "personalPhoneNumber": {
+          "type": "string"
+        },
+        "personalEmail": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "educationDetailsInstitutions": {
+          "type": "string"
+        },
+        "educationDetailsYears": {
+          "type": "string"
+        },
+        "educationDetailsQualifications": {
+          "type": "string"
+        },
+        "guarantor1FirstName": {
+          "type": "string"
+        },
+        "guarantor1LastName": {
+          "type": "string"
+        },
+        "guarantor1Address": {
+          "type": "string"
+        },
+        "guarantor1Occupation": {
+          "type": "string"
+        },
+        "guarantor1Age": {
+          "type": "string"
+        },
+        "guarantor2FirstName": {
+          "type": "string"
+        },
+        "guarantor2LastName": {
+          "type": "string"
+        },
+        "guarantor2Address": {
+          "type": "string"
+        },
+        "guarantor2Occupation": {
+          "type": "string"
+        },
+        "guarantor2Age": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "dateEmployed": {
+          "type": "string"
+        },
+        "corporateName": {
+          "type": "string"
+        },
+        "divisionName": {
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "departmentName": {
+          "type": "string"
+        },
+        "unitName": {
+          "type": "string"
+        },
+        "careerLevel": {
+          "type": "string"
+        },
+        "designationName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName",
+        "phoneNumber",
+        "officialEmail",
+        "personalPhoneNumber",
+        "personalEmail",
+        "address",
+        "dateOfBirth",
+        "educationDetailsInstitutions",
+        "educationDetailsYears",
+        "educationDetailsQualifications",
+        "guarantor1FirstName",
+        "guarantor1LastName",
+        "guarantor1Address",
+        "guarantor1Occupation",
+        "guarantor1Age",
+        "guarantor2FirstName",
+        "guarantor2LastName",
+        "guarantor2Address",
+        "guarantor2Occupation",
+        "guarantor2Age",
+        "description",
+        "role",
+        "dateEmployed",
+        "corporateName",
+        "divisionName",
+        "groupName",
+        "departmentName",
+        "unitName",
+        "careerLevel",
+        "designationName"
+      ]
+    },
+    "perspective": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "createdBy",
+        "tenantId"
+      ]
+    },
+    "tasks": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "uplineInitiative": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "taskType": {
+          "type": "string"
+        },
+        "routineType": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "repeatEvery": {
+          "type": "string"
+        },
+        "occursOnDaysWeekly": {
+          "type": "string"
+        },
+        "occursOnDayNumberMonthly": {
+          "type": "string"
+        },
+        "occursDayPositionMonthly": {
+          "type": "string"
+        },
+        "occursOnDayMonthly": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "afterOccurrence": {
+          "type": "string"
+        },
+        "reworkLimit": {
+          "type": "string"
+        },
+        "qualityTargetPoint": {
+          "type": "string"
+        },
+        "quantityTargetPoint": {
+          "type": "string"
+        },
+        "quantityTargetUnit": {
+          "type": "string"
+        },
+        "turnAroundTimeTargetPoint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "uplineInitiative",
+        "createdBy",
+        "taskType",
+        "routineType",
+        "startDate",
+        "startTime",
+        "duration",
+        "repeatEvery",
+        "occursOnDaysWeekly",
+        "occursOnDayNumberMonthly",
+        "occursDayPositionMonthly",
+        "occursOnDayMonthly",
+        "endDate",
+        "afterOccurrence",
+        "reworkLimit",
+        "qualityTargetPoint",
+        "quantityTargetPoint",
+        "quantityTargetUnit",
+        "turnAroundTimeTargetPoint"
       ]
     }
   }

@@ -72,33 +72,29 @@ function findAppBase(filePath: string): string {
   return path.join(APPS_DIR, parts[0]);
 }
 
-function findControllerFile(root: string): string | null {
-  const entries = fs.readdirSync(root, { withFileTypes: true });
-  let controllerFilePaths: string[] = [];
+function findAllControllerFiles(root: string): string[] {
+  const controllerFilePaths: string[] = [];
 
-  for (const entry of entries) {
-    const fullPath = path.join(root, entry.name);
+  function recurse(dir: string) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-    if (entry.isDirectory()) {
-      if (entry.name.toLowerCase() === "controllers") {
-        const controllerPath = path.join(fullPath, "index.ts");
-        if (fs.existsSync(controllerPath)) {
-          controllerFilePaths.push(controllerPath);
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        if (entry.name.toLowerCase() === "controllers") {
+          const controllerPath = path.join(fullPath, "index.ts");
+          if (fs.existsSync(controllerPath)) {
+            controllerFilePaths.push(controllerPath);
+          }
         }
-      } else {
-        const found = findControllerFile(fullPath);
-        if (found) {
-          controllerFilePaths.push(found);
-        }
+        recurse(fullPath);
       }
     }
   }
 
-  if (controllerFilePaths.length === 0) {
-    return null;
-  }
-
-  return controllerFilePaths[0];
+  recurse(root);
+  return controllerFilePaths;
 }
 
 function mapJoiTypeToSwagger(joiType: string): string {
@@ -164,19 +160,69 @@ function extractRoutesFromFile(
     const routePath = match[2];
     const fullPath = path.posix.join(parentPrefix, routePath);
 
+
     if (!baseSwagger.paths[fullPath]) {
       baseSwagger.paths[fullPath] = {};
     }
 
+    if (["post", "put"].includes(method)) {
+      const routeSegment = routePath.split("/").pop()?.toLowerCase() || "";
+      const schemaKey = `${routeSegment}schema`; // e.g., loginSchema
+      const schema = schemaMap[schemaKey];
+
+      if (schema) {
+        baseSwagger.definitions[routeSegment] = schema;
+
+        baseSwagger.paths[fullPath][method] = {
+          ...baseSwagger.paths[fullPath][method],
+          parameters: [
+            {
+              name: "body",
+              in: "body",
+              required: true,
+              schema: {
+                $ref: `#/definitions/${routeSegment}`,
+              },
+            },
+          ],
+        };
+      }
+    }
+
     const definitionRef = `#/definitions/${groupRoute}`;
+
+    const pathParams = [];
+    const queryParams: any[] = [];
+
+    const paramMatches = [...routePath.matchAll(/:([a-zA-Z0-9_]+)/g)];
+
+    for (const match of paramMatches) {
+      pathParams.push({
+        name: match[1],
+        in: "path",
+        required: true,
+        type: "string",
+      });
+    }
 
     baseSwagger.paths[fullPath][method] = {
       summary: "", //`Perform ${method.toUpperCase()} on ${groupRoute}`,
       description: `This endpoint allows you to ${method} data for ${groupRoute}. You can use it to create, read, update, or delete ${groupRoute} records.`,
       parameters:
         method === "get"
-          ? []
+          ? [
+              {
+                name: "search",
+                in: "query",
+                required: false,
+                type: "string",
+                description: "Optional search query",
+              },
+            ]
+          : method === "delete"
+          ? pathParams
           : [
+              ...pathParams,
               {
                 name: "body",
                 in: "body",
@@ -197,8 +243,6 @@ function extractRoutesFromFile(
 }
 
 function extractJoiSchemasFromController(controllerPath: string) {
-
-
   const content = fs.readFileSync(controllerPath, "utf-8");
   const sourceFile = ts.createSourceFile(
     controllerPath,
@@ -227,9 +271,6 @@ function extractJoiSchemasFromController(controllerPath: string) {
             const joiDesc = joiSchema.describe();
 
             if (definitions[schemaName]) {
-              console.log(
-                `Schema already exists for: ${schemaName}. Merging...`
-              );
               const existingSchema = definitions[schemaName];
               const newSchema = joiToSwaggerSchema(joiDesc);
               definitions[schemaName] = {
@@ -251,15 +292,62 @@ function processRouteFile(filePath: string) {
   const appBase = findAppBase(filePath);
   const { relativeDir, appDir } = getAppDirAndRelativeDir(filePath, appBase);
   const groupRoute = relativeDir || appDir;
-  let definitions = baseSwagger.definitions;
 
   extractRoutesFromFile(filePath, prefix, groupRoute);
 
-  const controllerPath = findControllerFile(appBase);
+  const controllerPaths = findAllControllerFiles(appBase);
 
-  if (controllerPath) {
-    const schema = extractJoiSchemasFromController(controllerPath);
-    console.log(controllerPath, schema);
+  for (const controllerPath of controllerPaths) {
+    extractJoiSchemasFromController(controllerPath);
+  }
+}
+
+const schemaMap: Record<string, any> = {};
+
+function collectAllSchemas(rootDir: string) {
+  const entries = fs.readdirSync(rootDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(rootDir, entry.name);
+
+    if (entry.isDirectory()) {
+      collectAllSchemas(fullPath);
+    } else if (entry.name.endsWith(".ts")) {
+      const content = fs.readFileSync(fullPath, "utf-8");
+      const sourceFile = ts.createSourceFile(
+        fullPath,
+        content,
+        ts.ScriptTarget.ESNext,
+        true
+      );
+
+      let controllerModule;
+      try {
+        controllerModule = require(fullPath);
+      } catch (err) {
+        continue;
+      }
+
+      sourceFile.forEachChild((node) => {
+        if (ts.isVariableStatement(node)) {
+          node.declarationList.declarations.forEach((declaration) => {
+            if (
+              ts.isIdentifier(declaration.name) &&
+              declaration.name.text.endsWith("Schema")
+            ) {
+              const varName = declaration.name.text;
+              const schema = controllerModule[varName];
+
+              if (Joi.isSchema(schema)) {
+                const joiDesc = schema.describe();
+                const swaggerSchema = joiToSwaggerSchema(joiDesc);
+                schemaMap[varName.toLowerCase()] = swaggerSchema;
+              }
+            }
+          });
+        }
+      });
+    }
   }
 }
 

@@ -1,8 +1,9 @@
 import cloudinary from "cloudinary";
 import { NextFunction, Request, Response } from "express";
-import { customResponse } from "../../utils/customResponse";
-import { handleRequests } from "../../utils/handleRequests";
-import { cloudinaryDelete, cloudinaryUploader } from "./utils/uploader";
+import { customResponse } from "../../../utils/customResponse";
+import { handleRequests } from "../../../utils/handleRequests";
+import { cloudinaryDelete, cloudinaryUploader } from "../utils/uploader";
+
 
 cloudinary.v2.config({
   cloudinary_url: process.env.CLOUDINARY_URL,
@@ -23,7 +24,7 @@ export const uploadFile = async (
     promise: cloudinaryUploader(req.file.path),
     message: "File uploaded successfully",
     res,
-    resData: (data) => data.secure_url,
+    resData: (data:any) => data.secure_url,
   });
 };
 

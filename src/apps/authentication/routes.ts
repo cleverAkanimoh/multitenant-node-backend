@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as userController from "./controllers/userControllers";
+import * as userController from "./controllers";
 
 import * as multiFAController from "./controllers/multiFA";
 import { authenticate } from "./middlewares";

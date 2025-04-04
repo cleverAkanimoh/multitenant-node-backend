@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import User from "../apps/users/models/user";
-import { tenantKeywords } from "./constants/tenantKeywords";
+import { tenantKeywords } from "../constants/tenantKeywords";
 
 export const generateTenantId = (): string => {
   const randomId = uuidv4().split("-")[0];

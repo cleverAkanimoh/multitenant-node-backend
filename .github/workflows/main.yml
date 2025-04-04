@@ -33,16 +33,18 @@ jobs:
             echo "Current directory: $(pwd)"
             echo "Shell: $SHELL"
             echo "PATH: $PATH"
-
-            # Set up Node environment using NVM
-            if [ "$USE_NVM" == "true" ]; then
-              echo "Using NVM for Node.js"
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-              [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-              nvm use default || nvm use node || echo "Node already active"
-              echo "Node version (via NVM): $(node -v)"
-            fi
+           
+            # Load NVM and set PATH correctly
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+            
+            export PATH="$HOME/.nvm/versions/node/v22.6.0/bin:$PATH"
+            
+            # Debugging: Print node, yarn, and pm2 paths
+            which node
+            which yarn
+            which pm2
 
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 
@@ -91,7 +93,12 @@ jobs:
               export PATH="/usr/bin:$PATH"
               echo "Node version (system): $(node -v)"
             fi
-
+           
+            # Debugging: Print node, yarn, and pm2 paths
+            which node
+            which yarn
+            which pm2
+            
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 
             echo "Resetting any local changes..."

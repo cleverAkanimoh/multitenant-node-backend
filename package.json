@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "ts-node ./src/utils/generateSwaggerSpecs.ts && nodemon ",
     "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "ts-node ./src/utils/generateSwaggerSpecs.ts && tsc",
     "generate-model": "ts-node generateModel.ts filedir filename",
     "generate-swagger": "ts-node ./src/utils/generateSwaggerSpecs.ts "
   },

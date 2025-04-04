@@ -10,10 +10,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # Use the ternary operator to set variables based on the branch pushed
-      BRANCH: ${{ github.ref == 'refs/heads/main' ? 'main' : 'staging' }}
-      DEPLOY_HOST: ${{ github.ref == 'refs/heads/main' ? secrets.HOST : secrets.STAGING_HOST }}
-      USE_NVM: ${{ github.ref == 'refs/heads/main' ? 'true' : 'false' }}
+      BRANCH: "${{ github.ref == 'refs/heads/main' && 'main' || 'staging' }}"
+      DEPLOY_HOST: "${{ github.ref == 'refs/heads/main' && secrets.HOST || secrets.STAGING_HOST }}"
+      USE_NVM: "${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -24,7 +23,6 @@ jobs:
           host: ${{ env.DEPLOY_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRI_KEY }}
-          port: 22
           script: |
             #!/bin/bash
             set -e

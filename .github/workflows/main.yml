@@ -93,7 +93,12 @@ jobs:
               export PATH="/usr/bin:$PATH"
               echo "Node version (system): $(node -v)"
             fi
-
+           
+            # Debugging: Print node, yarn, and pm2 paths
+            which node
+            which yarn
+            which pm2
+            
             cd /var/www/emnd/ || { echo "Failed to change directory"; exit 1; }
 
             echo "Resetting any local changes..."

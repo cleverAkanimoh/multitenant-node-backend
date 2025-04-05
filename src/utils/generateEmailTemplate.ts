@@ -126,7 +126,8 @@ export const generateEmailTemplate = ({
         <h2>${title}</h2>
         <p>${message}</p>
         <a 
-          href="${buttonLink}" 
+          href=${buttonLink} 
+          target="_blank"
           style="
             display: inline-block;
             padding: 12px 24px;
@@ -145,7 +146,7 @@ export const generateEmailTemplate = ({
         <p style="margin-top: 10px; font-size: 14px; color: #666;">
             Or copy and paste this URL into your browser:
             <br />
-            <a href="${buttonLink}" style="color: #0b3178; text-decoration: underline;">${buttonLink}</a>
+            <a href=${buttonLink} style="color: #0b3178; text-decoration: underline;">${buttonLink}</a>
           </p>
         
         <p class="note">If you didn't request this, please ignore this email.</p>

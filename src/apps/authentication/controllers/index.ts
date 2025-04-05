@@ -165,7 +165,7 @@ export const login = async (req: Request, res: Response) => {
       });
       res.cookie(COOKIE_NAME, token, { httpOnly: true, signed: true });
 
-      return { token, user: cleanUserData(user) };
+      return { token, user: await cleanUserData(user) };
     })(),
     message: "Login was successful",
     res,

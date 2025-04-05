@@ -41,6 +41,7 @@ export const createTenantSchema = async (tenantId: string) => {
     debugLog(tenantId, "created successfully");
   } catch (error) {
     debugLog(`❌ Error creating schema ${tenantId}:`, error);
+    throw new Error("Failed to delete tenant schema");
   }
 };
 
@@ -63,6 +64,7 @@ export const deleteTenantSchema = async (tenantId: string) => {
     debugLog(`🗑️ Schema ${tenantId} deleted`);
   } catch (error) {
     debugLog(`❌ Error deleting schema ${tenantId}:`, error);
+    throw new Error("Failed to delete tenant schema");
   }
 };
 

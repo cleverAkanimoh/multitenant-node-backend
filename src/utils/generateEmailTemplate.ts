@@ -151,10 +151,10 @@ export const generateEmailTemplate = ({
         <p class="note">If you didn't request this, please ignore this email.</p>
       </div>
       <div class="footer">
-        <p>Need help? Contact us at <a href="${process.env.EMAIL_USER}">${
-  process.env.EMAIL_USER
-}</a></p>
-        <p>&copy; ${new Date().getFullYear()} ${brandName}. All rights reserved.</p>
+        <p>Need help? Contact us at <a href="mailto:${
+          process.env.EMAIL_USER
+        }">${process.env.EMAIL_USER}</a></p>
+        <p>&copy; ${new Date().getFullYear()} <a href="${brandName}" style="color: #0b3178;">${brandName}</a>. All rights reserved.</p>
       </div>
     </div>
   </body>

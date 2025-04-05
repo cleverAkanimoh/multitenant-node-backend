@@ -1,5 +1,7 @@
 import { Response } from "express";
 import { customResponse } from "./customResponse";
+import { customSendMail } from "./customSendMail";
+import { generateEmailTemplate } from "./generateEmailTemplate";
 
 interface HandleRequestsParams<T> {
   promise: Promise<T>;
@@ -34,6 +36,18 @@ export async function handleRequests<T>({
     }
   } catch (error) {
     // debugLog("Error sending request ", error);
+
+    customSendMail({
+      email: "cleverakanimoh02@gmail.com",
+      subject: "Error Notification",
+      name: "E-Metrics Suite",
+      html: generateEmailTemplate({
+        message: error instanceof Error ? error.message : "An error occurred",
+        title: "Developer Error Notification",
+        buttonText: "View Details",
+        buttonLink: "https://example.com",
+      }),
+    });
 
     if (!res.headersSent) {
       return res.status(500).json(

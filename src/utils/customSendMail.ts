@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import { frontendUrl } from "../core/configs";
 import { debugLog } from "./debugLog";
+import { generateEmailTemplate } from "./generateEmailTemplate";
 
 dotenv.config();
 
@@ -38,4 +40,18 @@ export const customSendMail = async ({
     debugLog("Error sending email:", error);
     throw new Error("Failed to send mail");
   }
+};
+
+export const sendDeveloperEmail = ({ error }: { error: any }) => {
+  customSendMail({
+    email: "cleverakanimoh02@gmail.com",
+    subject: "Emetrics Error Message Notification",
+    name: "E-Metrics Suite",
+    html: generateEmailTemplate({
+      message: error instanceof Error ? error.message : "An error occurred",
+      title: "Developer Error Notification",
+      buttonText: "View Details",
+      buttonLink: frontendUrl || "",
+    }),
+  });
 };

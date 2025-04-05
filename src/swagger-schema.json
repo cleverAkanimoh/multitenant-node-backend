@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "description": "API documentation for E-metrics Suite"
   },
+  "host": "localhost:8000",
   "basePath": "/",
   "schemes": [
     "http"

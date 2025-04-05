@@ -10,13 +10,14 @@ const corsSetup = (app: Express) => {
 
   app.use(
     cors({
-      origin: [...allowedOrigins, "https://emetrics-app-v2.netlify.app"],
+      origin: allowedOrigins,
       optionsSuccessStatus: 200,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-tenant"],
       credentials: true,
     })
   );
+  app.options("*", cors());
 
   debugLog("CORS setup successfully");
 };

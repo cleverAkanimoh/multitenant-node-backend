@@ -134,8 +134,6 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
       );
       if (!organization) throw new Error("Organization creation failed");
 
-      console.log({ organization });
-
       const newUser = await TenantUser.create(
         {
           ...userData,

@@ -32,65 +32,6 @@ import {
   verifyPassword,
 } from "../services";
 
-/**
- * @swagger
- * /auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Clever Akanimoh"
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "cleverakanimoh02@gmail.com"
- *               tenantId:
- *                 type: string
- *                 example: "blt"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "User.1234"
- *               userRole:
- *                 type: string
- *                 enum: [admin, employer, user]
- *                 example: "employer"
- *               mfaSecret:
- *                 type: string
- *                 nullable: true
- *                 example: null
- *               isStaff:
- *                 type: boolean
- *                 default: false
- *                 example: false
- *               isActive:
- *                 type: boolean
- *                 default: false
- *                 example: false
- *               isMfaEnabled:
- *                 type: boolean
- *                 default: false
- *                 example: false
- *               deletedAt:
- *                 type: string
- *                 format: date-time
- *                 nullable: true
- *     responses:
- *       201:
- *         description: User created successfully
- *       400:
- *         description: Email is already registered
- *       500:
- *         description: Internal Server Error
- */
 export const registerUser = async (
   req: Request,
   res: Response

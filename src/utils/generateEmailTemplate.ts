@@ -126,7 +126,8 @@ export const generateEmailTemplate = ({
         <h2>${title}</h2>
         <p>${message}</p>
         <a 
-          href="${buttonLink}" 
+          href=${buttonLink} 
+          target="_blank"
           style="
             display: inline-block;
             padding: 12px 24px;
@@ -145,16 +146,16 @@ export const generateEmailTemplate = ({
         <p style="margin-top: 10px; font-size: 14px; color: #666;">
             Or copy and paste this URL into your browser:
             <br />
-            <a href="${buttonLink}" style="color: #0b3178; text-decoration: underline;">${buttonLink}</a>
+            <a href=${buttonLink} style="color: #0b3178; text-decoration: underline;">${buttonLink}</a>
           </p>
         
         <p class="note">If you didn't request this, please ignore this email.</p>
       </div>
       <div class="footer">
-        <p>Need help? Contact us at <a href="${process.env.EMAIL_USER}">${
-  process.env.EMAIL_USER
-}</a></p>
-        <p>&copy; ${new Date().getFullYear()} ${brandName}. All rights reserved.</p>
+        <p>Need help? Contact us at <a href="mailto:${
+          process.env.EMAIL_USER
+        }">${process.env.EMAIL_USER}</a></p>
+        <p>&copy; ${new Date().getFullYear()} <a href="${brandName}" style="color: #0b3178;">${brandName}</a>. All rights reserved.</p>
       </div>
     </div>
   </body>

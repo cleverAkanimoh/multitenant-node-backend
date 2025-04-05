@@ -73,10 +73,10 @@ export async function syncSchemas() {
     debugLog("Synchronizing Public Schema(s)");
 
     if (!isProduction) {
-      await Organization.sync({ alter: true });
+      await Organization.sync({ alter: !isProduction });
       debugLog(`✅ Organization synchronized.`);
 
-      await User.sync({ alter: true });
+      await User.sync({ alter: !isProduction });
       debugLog(`✅ User synchronized.`);
     } else {
       debugLog(`🚫 Skipped sync for Public models in production`);
@@ -111,12 +111,12 @@ export async function syncSchemas() {
 
       for (const model of modelsToSync) {
         try {
-          if (!isProduction) {
-            await model.sync({ alter: true });
-            debugLog(`✅ ${model.name} synchronized.`);
-          } else {
-            debugLog(`🚫 Skipped sync for ${model.name} in production`);
-          }
+          await model.sync({ alter: !isProduction });
+          debugLog(`✅ ${model.name} synchronized.`);
+          // if (!isProduction) {
+          // } else {
+          //   debugLog(`🚫 Skipped sync for ${model.name} in production`);
+          // }
         } catch (modelError) {
           debugLog(
             `❌ Error syncing model ${model.name} in ${schema}:`,

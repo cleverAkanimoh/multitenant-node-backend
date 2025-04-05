@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { COOKIE_NAME } from "../../../core/constants";
-import { getTenantModel } from "../../../core/multitenancy";
 import { customResponse } from "../../../utils/customResponse";
 import {
   handleRequests,
@@ -92,11 +91,9 @@ export const activateAccount = async (req: Request, res: Response) => {
           })
         );
 
-      const TenantUser = getTenantModel(User, decoded.tenantId);
+      const user = await User.findByPk(decoded.userId);
 
-      const user = await TenantUser.findByPk(decoded.userId);
-
-      if (user.isActive)
+      if (user?.isActive)
         return res.status(400).json(
           customResponse({
             message: "Account is already active",
@@ -104,7 +101,7 @@ export const activateAccount = async (req: Request, res: Response) => {
           })
         );
 
-      return await TenantUser.update(
+      return await User.update(
         { isActive: true },
         { where: { id: decoded.userId } }
       );
@@ -144,24 +141,15 @@ export const login = async (req: Request, res: Response) => {
   return handleRequests({
     promise: (async () => {
       const { email, password } = req.body;
-      const globalUser = await findUserByEmail(email.toLowerCase());
+      const user = await findUserByEmail(email.toLowerCase());
 
-      if (
-        !globalUser?.email ||
-        !(await verifyPassword(password, globalUser.password))
-      ) {
+      if (!user?.email || !(await verifyPassword(password, user.password))) {
         return res
           .status(400)
           .json(
             customResponse({ message: "Invalid credentials", statusCode: 400 })
           );
       }
-
-      const TenantUser = getTenantModel(User, globalUser.tenantId);
-
-      const user = await TenantUser.findOne({
-        where: { email: globalUser.email },
-      });
 
       if (!user.isActive) {
         await sendAccountVerificationEmail(user, false);
@@ -250,7 +238,9 @@ export const changePassword = async (req: Request, res: Response) => {
  */
 export const logout = (req: Request, res: Response) => {
   res.clearCookie(COOKIE_NAME);
-  res.json(customResponse({ message: "Logout successful", statusCode: 200 }));
+  res
+    .status(204)
+    .json(customResponse({ message: "Logout successful", statusCode: 204 }));
 };
 
 export const getCurrentUser = async (req: Request, res: Response) => {
@@ -344,9 +334,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
       const hashedPassword = await hashPassword(newPassword);
 
-      const TenantUser = getTenantModel(User, decoded.tenantId);
-
-      await TenantUser.update(
+      await User.update(
         { password: hashedPassword },
         { where: { id: decoded.userId } }
       );

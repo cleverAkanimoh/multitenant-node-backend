@@ -2,6 +2,7 @@ import Organization from "../(dashboard)/organization/models";
 import {
   createTenantSchema,
   deleteTenantSchema,
+  syncSchemas,
 } from "../../core/multitenancy";
 import { sendDeveloperEmail } from "../../utils/customSendMail";
 import { debugLog } from "../../utils/debugLog";
@@ -112,6 +113,8 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
 
   try {
     await createTenantSchema(tenantIdIfNone);
+
+    await syncSchemas();
 
     return await withTransaction(async (transaction) => {
       const organization = await Organization.create(

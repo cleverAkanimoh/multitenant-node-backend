@@ -4,6 +4,7 @@ import {
   deleteTenantSchema,
   getTenantModel,
 } from "../../core/multitenancy";
+import { sendDeveloperEmail } from "../../utils/customSendMail";
 import { debugLog } from "../../utils/debugLog";
 import { generateUniqueTenantId } from "../../utils/generateTenantId";
 import { withTransaction } from "../../utils/withTransaction";
@@ -110,8 +111,6 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
     }
   }
 
-
-
   try {
     await createTenantSchema(tenantIdIfNone);
 
@@ -172,6 +171,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
     });
   } catch (error) {
     debugLog("Deleting tenant schema", error);
+    sendDeveloperEmail({ error });
     await deleteTenantSchema(tenantIdIfNone);
     throw error;
   }

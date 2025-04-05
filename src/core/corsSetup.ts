@@ -7,7 +7,7 @@ dotenv.config();
 const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
 
 export const corsConfig = {
-  origin: allowedOrigins,
+  origin: [...allowedOrigins, "https://emetrics-app-v2.netlify.app"],
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-tenant"],

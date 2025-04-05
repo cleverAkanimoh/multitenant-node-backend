@@ -4,16 +4,18 @@ import { verifyJwtToken } from "../apps/authentication/services";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
 
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const clients = new Map<string, Socket>();
 
 export const setupWebSocketServer = (server: HTTPServer) => {
+  const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
+
   const io = new SocketIOServer(server, {
     cors: {
-      origin: [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "https://emetrics.netlify.app",
-      ],
+      origin: allowedOrigins,
     },
   });
 

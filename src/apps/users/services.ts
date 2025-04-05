@@ -110,18 +110,20 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
     }
   }
 
-  await createTenantSchema(tenantIdIfNone);
 
-  const TenantUser = getTenantModel(User, tenantIdIfNone);
-
-  TenantUser.belongsTo(Organization, {
-    foreignKey: { name: "tenantId", allowNull: false },
-    as: tenantIdIfNone + "-organization",
-  });
-
-  await TenantUser.sync({ alter: true });
 
   try {
+    await createTenantSchema(tenantIdIfNone);
+
+    const TenantUser = getTenantModel(User, tenantIdIfNone);
+
+    TenantUser.belongsTo(Organization, {
+      foreignKey: { name: "tenantId", allowNull: false },
+      as: tenantIdIfNone + "-organization",
+    });
+
+    await TenantUser.sync({ alter: true });
+
     return await withTransaction(async (transaction) => {
       const organization = await Organization.create(
         {

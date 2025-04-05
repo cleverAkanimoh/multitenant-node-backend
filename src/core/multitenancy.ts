@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import { QueryTypes } from "sequelize";
 import CareerPath from "../apps/(dashboard)/careerpath/models";
 import Designations from "../apps/(dashboard)/designations/models";
@@ -12,47 +13,72 @@ import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
 import sequelize from "./orm";
 
+dotenv.config();
+
+const isProduction = process.env.NODE_ENV === "production";
+
 export const getTenantModel = (model: any, tenantSchema: string): any => {
   return model.schema(tenantSchema, { schemaDelimiter: "." });
 };
 
 export async function getTenantSchemas() {
-  const [schemas] = await sequelize.query(
-    `SELECT schema_name FROM information_schema.schemata 
-     WHERE schema_name NOT IN ('public', 'pg_catalog', 'information_schema', 'pg_toast')
-     AND schema_name NOT LIKE 'pg_%';`
-  );
-
-  return schemas.map((s: any) => s.schema_name);
+  try {
+    const [schemas] = await sequelize.query(
+      `SELECT schema_name FROM information_schema.schemata 
+       WHERE schema_name NOT IN ('public', 'pg_catalog', 'information_schema', 'pg_toast')
+       AND schema_name NOT LIKE 'pg_%';`
+    );
+    return schemas.map((s: any) => s.schema_name);
+  } catch (error) {
+    debugLog("❌ Error fetching tenant schemas:", error);
+    return [];
+  }
 }
 
 export const createTenantSchema = async (tenantId: string) => {
-  await sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${tenantId}";`);
-
-  debugLog(tenantId, "created successfully");
+  try {
+    await sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${tenantId}";`);
+    debugLog(tenantId, "created successfully");
+  } catch (error) {
+    debugLog(`❌ Error creating schema ${tenantId}:`, error);
+  }
 };
 
 export const checkIfSchemaExists = async (schemaName: string) => {
-  const result = await sequelize.query(
-    `SELECT schema_name FROM information_schema.schemata WHERE schema_name = :schemaName;`,
-    { replacements: { schemaName }, type: QueryTypes.SELECT }
-  );
-  return result.length > 0;
+  try {
+    const result = await sequelize.query(
+      `SELECT schema_name FROM information_schema.schemata WHERE schema_name = :schemaName;`,
+      { replacements: { schemaName }, type: QueryTypes.SELECT }
+    );
+    return result.length > 0;
+  } catch (error) {
+    debugLog(`❌ Error checking if schema exists (${schemaName}):`, error);
+    return false;
+  }
 };
 
 export const deleteTenantSchema = async (tenantId: string) => {
-  await sequelize.query(`DROP SCHEMA IF EXISTS "${tenantId}" CASCADE;`);
+  try {
+    await sequelize.query(`DROP SCHEMA IF EXISTS "${tenantId}" CASCADE;`);
+    debugLog(`🗑️ Schema ${tenantId} deleted`);
+  } catch (error) {
+    debugLog(`❌ Error deleting schema ${tenantId}:`, error);
+  }
 };
 
 export async function syncSchemas() {
   try {
     debugLog("Synchronizing Public Schema(s)");
 
-    await Organization.sync({ alter: true });
-    debugLog(`✅ Organization synchronized.`);
+    if (!isProduction) {
+      await Organization.sync({ alter: true });
+      debugLog(`✅ Organization synchronized.`);
 
-    await User.sync({ alter: true });
-    debugLog(`✅ User synchronized.`);
+      await User.sync({ alter: true });
+      debugLog(`✅ User synchronized.`);
+    } else {
+      debugLog(`🚫 Skipped sync for Public models in production`);
+    }
 
     const tenantSchemas = await getTenantSchemas();
 
@@ -70,8 +96,6 @@ export async function syncSchemas() {
       const TenantCareerPath = getTenantModel(CareerPath, schema);
 
       const modelsToSync = [
-        // User,
-        // Organization,
         TenantUser,
         TenantPerspective,
         TenantObjective,
@@ -84,8 +108,19 @@ export async function syncSchemas() {
       ];
 
       for (const model of modelsToSync) {
-        await model.sync({ alter: true });
-        debugLog(`✅ ${model.name} synchronized.`);
+        try {
+          if (!isProduction) {
+            await model.sync({ alter: true });
+            debugLog(`✅ ${model.name} synchronized.`);
+          } else {
+            debugLog(`🚫 Skipped sync for ${model.name} in production`);
+          }
+        } catch (modelError) {
+          debugLog(
+            `❌ Error syncing model ${model.name} in ${schema}:`,
+            modelError
+          );
+        }
       }
     }
   } catch (error) {

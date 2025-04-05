@@ -2,7 +2,6 @@ import Organization from "../(dashboard)/organization/models";
 import {
   createTenantSchema,
   deleteTenantSchema,
-  getTenantModel,
 } from "../../core/multitenancy";
 import { sendDeveloperEmail } from "../../utils/customSendMail";
 import { debugLog } from "../../utils/debugLog";
@@ -114,15 +113,6 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
   try {
     await createTenantSchema(tenantIdIfNone);
 
-    const TenantUser = getTenantModel(User, tenantIdIfNone);
-
-    TenantUser.belongsTo(Organization, {
-      foreignKey: { name: "tenantId", allowNull: false },
-      as: tenantIdIfNone + "-organization",
-    });
-
-    await TenantUser.sync({ alter: true });
-
     return await withTransaction(async (transaction) => {
       const organization = await Organization.create(
         {
@@ -135,7 +125,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
       );
       if (!organization) throw new Error("Organization creation failed");
 
-      const newUser = await TenantUser.create(
+      const newUser = await User.create(
         {
           ...userData,
           email: userData.email.toLowerCase(),
@@ -151,21 +141,7 @@ export const createSuperAdmin = async (userData: UserCreationAttributes) => {
       organization.ownerId = newUser.id;
       await organization.save({ transaction });
 
-      const user = await User.create(
-        {
-          ...userData,
-          email: userData.email.toLowerCase(),
-          password: hashedPassword,
-          tenantId: tenantIdIfNone,
-          userRole: Roles.SUPERADMIN,
-          isActive: false,
-          isStaff: true,
-          id: newUser.id,
-        },
-        { transaction }
-      );
-
-      await sendAccountVerificationEmail(user);
+      await sendAccountVerificationEmail(newUser);
 
       return newUser;
     });

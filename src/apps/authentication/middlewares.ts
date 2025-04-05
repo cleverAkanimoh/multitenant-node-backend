@@ -17,19 +17,15 @@ export const authenticate = async (
   try {
     const decoded = verifyJwtToken(token);
 
-    const gUser = await findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
 
-    if (!gUser)
+    if (!user)
       return res.status(400).json(
         customResponse({
           message: "Invalid or expired token",
           statusCode: 44,
         })
       );
-
-    const TenantUser = getTenantModel(User, decoded.tenantId);
-
-    const user = await TenantUser.findByPk(decoded.userId);
 
     req.user = user;
     req.organization = decoded.tenantId;

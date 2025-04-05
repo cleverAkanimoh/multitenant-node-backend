@@ -4,19 +4,13 @@ import { verifyJwtToken } from "../apps/authentication/services";
 import User from "../apps/users/models/user";
 import { debugLog } from "../utils/debugLog";
 
-import dotenv from "dotenv";
-
-dotenv.config();
+import { corsConfig } from "./corsSetup";
 
 const clients = new Map<string, Socket>();
 
 export const setupWebSocketServer = (server: HTTPServer) => {
-  const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
-
   const io = new SocketIOServer(server, {
-    cors: {
-      origin: allowedOrigins,
-    },
+    cors: corsConfig,
   });
 
   io.use(async (socket, next) => {

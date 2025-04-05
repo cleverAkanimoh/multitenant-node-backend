@@ -40,7 +40,7 @@ export const setupWebSocketServer = (server: HTTPServer) => {
 
     socket.on("send", (data) => {
       debugLog(`Message from ${userId}:`, data);
-      io.emit("newMessage", { userId, ...data }); // Broadcast to all clients
+      io.emit("newMessage", { userId, ...data }); 
     });
 
     socket.on("disconnect", () => {

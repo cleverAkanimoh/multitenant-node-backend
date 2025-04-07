@@ -6,6 +6,9 @@ import { debugLog } from "../utils/debugLog";
 dotenv.config();
 const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(",") || [];
 
+console.log({allowedOrigins});
+
+
 export const corsConfig = {
   origin: [
     ...allowedOrigins,
@@ -20,7 +23,7 @@ export const corsConfig = {
 
 const corsSetup = (app: Express) => {
   app.use(cors(corsConfig));
-  app.options("*", cors());
+  app.options("*", cors(corsConfig));
 
   debugLog("CORS setup successfully");
 };

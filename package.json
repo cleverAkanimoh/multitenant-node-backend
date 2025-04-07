@@ -5,9 +5,9 @@
   "license": "MIT",
   "description": "Express backend with multi-tenancy, REST APIs, and TypeScript",
   "scripts": {
-    "dev": "ts-node ./src/utils/generateSwaggerSpecs.ts && nodemon ",
+    "dev": "nodemon ",
     "start": "node dist/index.js",
-    "build": "ts-node ./src/utils/generateSwaggerSpecs.ts && tsc",
+    "build": "tsc",
     "generate-model": "ts-node generateModel.ts filedir filename",
     "generate-swagger": "ts-node ./src/utils/generateSwaggerSpecs.ts "
   },
